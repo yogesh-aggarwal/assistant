@@ -261,7 +261,6 @@ class Analyse():
 
         if Tools().reOperation(query, "open", "at start"):
             self.openClassify(query.replace("open ", "", 1))
-        # elif "play" in query:
         elif Tools().reOperation(query, "play", "at start"):
             self.playClassify(query.replace("play ", ""))
         elif Tools().reOperation(query, "search", "at start"):
@@ -279,8 +278,7 @@ class Analyse():
                 assistant.speak("No internet connection")
         # elif query == "test":
         elif Tools().reOperation(query, "test", "at start"):
-            # print(Question().checkQuestion("what your name"))  # PENDING
-            Question(query.replace("test ---> ", ""))
+            print(Question().checkQuestion(query=query.replace("test ---> ", "", 1)))
         else:
             assistant.speak(
                 "I am not able to understand your query at the moment. Please try after future updates.")
@@ -380,9 +378,8 @@ class Analyse():
 
 
 class Question:
-    def __init__(self, query):
-        # self.checkQuestion()
-        self.classify(query)
+    def __init__(self):
+        self.quesType = ""
 
     def checkQuestion(self, query=""):
         """
@@ -392,11 +389,10 @@ class Question:
         keywords = tuple(Sqlite3(databPath=r"data\database\attributes.db").execute(
             "SELECT * FROM KEYWORDS;")[0][1].replace("(", "", 1).replace(")", "", 1).split(", "))
         for word in keywords:
-            # print(word)
-            # print(Tools().reOperation(query, word, "at start"))
+            word = word.lower()
             if Tools().reOperation(query, word, "at start"):
-                print("--------------------------------------------------")
                 __temp = True
+                self.quesType = word
                 break
 
         if __temp:
@@ -406,6 +402,3 @@ class Question:
             del __temp
             return False
 
-    def classify(self, query):
-        if Tools().reOperation(query, "what", "at start"):
-            chatBot.AnalyseQuestion(type="what", query=query)

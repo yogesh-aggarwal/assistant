@@ -15,7 +15,7 @@ import sklearn
 import wikipedia
 
 import assistant
-import faceRecognition as fr
+# import faceRecognition as fr
 import share
 # import tools.toolLib
 from tools.sql_operation import Sqlite3 as sql
