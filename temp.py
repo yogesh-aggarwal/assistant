@@ -3,6 +3,7 @@ def analyse(query):
     """
     Analyses the type of command provided. Categorizes it to its type.
     """
+    pass
     # if (query == "exit"):
     #     features.exit_assist()
 
