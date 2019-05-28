@@ -1,0 +1,411 @@
+import os
+import random
+import re
+import webbrowser
+
+import bs4
+import numpy as np
+import requests
+
+import assistant
+import features.assist_games as games
+import features.chatBot as chatBot
+import features.faceRecognition as fr
+from tools.sql_operation import Sqlite3
+
+# Garbage
+# web_domains = np.array([".com", ".in", ".org", ".net",
+#                         ".edu", ".int", ".gov", ".mil", ".arpa"])
+web_domains = Sqlite3(databPath=r"data\database\services.db").execute(
+    "SELECT USAGE FROM DOMAIN")
+
+
+class Web:
+    def __init__(self, query=""):
+        self.query = query
+        self.__domain_presence = False
+
+    @staticmethod
+    def checkConnection(web_page=""):
+        """
+        Checks whether there is internet connection available or not. Returns boolean value as per the outcome.
+        """
+        try:
+            if web_page:
+                if "http://" in web_page:
+                    web_page = web_page.replace.replace(
+                        "https://", "").replace("http://", "")
+                else:
+                    web_page = "http://" + web_page
+
+                request = requests.get(web_page)
+                if request.status_code == 200:
+                    return True
+                else:
+                    return False
+
+            else:
+                web_page = "https://google.com"
+                request = requests.get(web_page)
+                if request.status_code == 200:
+                    return True
+                else:
+                    return False
+
+            del web_page
+        except:
+            return False
+
+    def checkWebExists(self, query=""):
+        """
+        Checks the existance of the address provided.
+
+        If there is connection return problem return "No internet connection", else return True or False.
+
+        Exists = True,
+        Not exists = False
+        """
+        exist = False
+        if not query:
+            query = self.query.replace("webpage ", "")
+
+        if self.checkConnection():
+            for domain in web_domains:
+                domain = domain[0]
+                if domain not in query:
+                    self.__domain_presence = False
+                else:
+                    self.__domain_presence = True
+                    break
+
+            for domain in web_domains:
+                domain = domain[0]
+                if not self.__domain_presence:
+                    try:
+                        if self.checkConnection(query + domain):
+                            query += domain
+                            self.__domain_presence = True
+                            exist = True
+                            break
+                        else:
+                            self.__domain_presence = False
+                    except:
+                        pass
+                else:
+                    if self.checkConnection(query):
+                        exist = True
+                        break
+            if exist:
+                return True
+            else:
+                return False
+        else:
+            return "No internet connection"
+            # print("No internet connection")
+
+    def findDomain(self, query=""):
+        """
+        Finds the web domain of the name provided.
+
+        If there is connection return problem return "No internet connection", else return True or False.
+        """
+        __domain_presence = False
+        __domain = ""
+
+        for domain in web_domains:
+            domain = domain[0]
+            if Tools().reOperation(query, domain, "at end"):
+                __domain = domain
+                __domain_presence = True
+                break
+
+        if not __domain_presence:
+            for domain in web_domains:
+                domain = domain[0]
+                if Web().checkWebExists(query=query + domain) == True:
+                    return domain
+                elif Web().checkWebExists(query=query + domain) == False:
+                    return "Webpage doesn't exists."
+                else:
+                    return "No internet connection"
+        else:
+            return ""
+
+
+class Search:
+    def __init__(self):
+        pass
+
+    def classify(self, query=""):
+        # Get it from the database and save it in the form of numpy array before using it.
+        sql = Sqlite3(
+            databPath=r"F:\Python\AI\assistant\data\database\services.db")
+        # print(sql)
+
+        engines = np.array(["google", "bing", "ask", "yahoo", "youtube"])
+        services = np.array(["youtube.com", "ganna.com"])
+
+        patt = re.compile(r"^search")
+
+        matches = patt.finditer(query)
+
+        replace = False
+
+        for match in matches:
+            if match.span():
+                replace = True
+
+        if replace:
+            query = query.replace("search", "", 1)
+        del replace
+
+        engine = ""
+        wordList = re.sub(r"[^\w]", " ",  query).split()
+
+        for engine_test in engines:
+            if wordList[0] == engine_test:
+                engine = engine_test
+                break
+
+        for count in range(2):
+            if engine:
+                garbage = np.array(["for", "at", "on"])
+                for word in garbage:
+                    query = query.replace(word, "", 1)
+                del garbage
+                self.searchEngine(query=query, engine=engine)
+                break
+            else:
+                for engine_test in engines:
+                    if wordList[len(wordList)-1] == engine_test:
+                        engine = engine_test
+                        break
+
+        if engine not in engines:
+            garbage = np.array(["for", "at", "on"])
+            for word in garbage:
+                query = query.replace(word, "", 1)
+            del garbage
+            self.searchEngine(query=query)
+
+        elif True:
+            # More search methods
+            pass
+
+    def searchEngine(self, query="", engine="google"):
+        query = query.replace(engine, "", 1)
+        method = Tools().getSearchMethod(engine)
+        webbrowser.open_new_tab(f"https://{engine}.com{method}{query}")
+
+    def youtubeVideoSearch(self, query=""):
+        res = requests.get(
+            f"https://youtube.com{Tools().getSearchMethod('youtube')}{query}").text
+        soup = bs4.BeautifulSoup(res, "lxml")
+        links = []
+        for link in soup.find_all("a", href=True):
+            links.append(link["href"])
+        vid = ""
+
+        for link in links:
+            if "/watch?v=" in link:
+                vid = link
+                break
+
+        return f"https://www.youtube.com{vid}"
+
+
+class Tools:
+    def __init__(self):
+        pass
+
+    def getSearchMethod(self, engine=""):
+        # Get methods from sql database and map them to dicts.
+        try:
+            return Sqlite3(databPath=r"data\database\services.db").execute(f"SELECT METHOD FROM ENGINES WHERE NAME='{engine.capitalize()}'")[0][0]
+        except:
+            return Sqlite3(databPath=r"data\database\services.db").execute(f"SELECT METHOD FROM ENGINES WHERE NAME='Google'")[0][0]
+
+    def reOperation(self, query, string, method):
+        # print(f"re ---> query ---> {query}")
+        # print(f"re ---> string ---> {string}")
+        __temp = False
+        if method == "at start":
+            patt = re.compile(rf"^{string}")
+        elif method == "at end":
+            patt = re.compile(rf"{string}$")
+        
+        matches = patt.finditer(query)
+        for match in matches:
+            if match != None:
+                __temp = True
+            else:
+                __temp = False
+        
+        if __temp:
+            del __temp
+            return True
+        else:
+            del __temp
+            return False
+
+
+class Analyse():
+    def __init__(self, query):
+        self.query = query
+
+    def classify(self, web_domains=web_domains):
+        """
+        Classifies the string provided to different categories.
+        """
+        query = self.query
+
+        if Tools().reOperation(query, "open", "at start"):
+            self.openClassify(query.replace("open ", "", 1))
+        # elif "play" in query:
+        elif Tools().reOperation(query, "play", "at start"):
+            self.playClassify(query.replace("play ", ""))
+        elif Tools().reOperation(query, "search", "at start"):
+            var = Search()
+            var.classify(query)
+        elif Tools().reOperation(query, "go to", "at start"):
+            query = query.replace("go to", "", 1).replace(
+                "https://", "", 1).replace("http://", "", 1).replace(" ", "")
+            domain = Web().findDomain(query)
+            if domain != "No internet connection":
+                if domain != "Webpage does not exists":
+                    webbrowser.open_new_tab("https://" + query + domain)
+            else:
+                # print("Error")
+                assistant.speak("No internet connection")
+        # elif query == "test":
+        elif Tools().reOperation(query, "test", "at start"):
+            # print(Question().checkQuestion("what your name"))  # PENDING
+            Question(query.replace("test ---> ", ""))
+        else:
+            assistant.speak(
+                "I am not able to understand your query at the moment. Please try after future updates.")
+
+    @staticmethod
+    def openClassify(query):
+        """
+        Classifies the query containing "open" keyword.
+        """
+        if False:
+            # First check for the programs available on the machine.
+            pass
+        elif Tools().reOperation(query, "webpage", "at start"):
+            if Web(query).checkWebExists() == "No internet connection":
+                assistant.speak("No internet connection")
+            if Web(query).checkWebExists():
+                print("Open webpage")
+            else:
+                print("Webpage does not exists")
+        elif Tools().reOperation(query, "my", "at start"):
+            query = query.replace("my", "", 1)
+            if "folder" in query:
+                query = query.replace("folder", "").replace(" ", "", 1)
+                # Add the user path to the folder name.
+                os.startfile(f"{os.path.expanduser('~')}\\{query}")
+
+            elif "favourate" in query:
+                query.replace("favourate", "")
+                if "video" in query:
+                    # Get the file from the sql database.
+                    file = r"test\files\video\vid_1.mp4"
+                    os.startfile(file)
+                elif "music" or "song" in query:
+                    # Get the file from the sql database.
+                    file = r"test\files\music\mus_1.mp3"
+                    os.startfile(file)
+                elif "image" or "photo" in query:
+                    # Get the file from the sql database.
+                    file = r"test\files\image\img_1.jpg"
+                    os.startfile(file)
+        else:
+            query = query.replace("go to", "", 1).replace(
+                "https://", "", 1).replace("http://", "", 1).replace(" ", "")
+            domain = Web().findDomain(query)
+            if domain != "Webpage doesn't exists.":
+                webbrowser.open_new_tab("https://" + query + domain)
+            else:
+                print(domain)
+
+    @staticmethod
+    def playClassify(query):
+        """
+        Classifies the query containing "play" keyword.
+        """
+        if "video" in query:
+            # Get the greet keywords from the sql database and convert it to numpy array before using it.
+            greet_keywords = np.array(
+                [["Sure!", "Okay!", "Playing now", "Here it is", "Here is what you have demanded"]])
+            # print("Playing")
+            assistant.speak(random.choice(greet_keywords[0]))
+
+            video_folder = "D:/Videos/Music Videos"
+
+            if not video_folder:
+                # Link to different video services. Get the preferred service from the user database if available.
+                pass
+            else:
+                # Get the folder path from the sql database and convert it to numpy array before using it.
+                files = os.listdir(video_folder)
+                os.startfile(f"{video_folder}/{random.choice(files)}")
+        elif "music" in query or "song" in query:
+            # Get the greet keywords from the sql database and convert it to numpy array before using it.
+            greet_keywords = np.array(
+                [["Sure!", "Okay!", "Playing now", "Here it is", "Here is what you have demanded"]])
+            # print("Playing")
+            assistant.speak(random.choice(greet_keywords[0]))
+
+            music_folder = "D:/Music/All time Music"
+
+            if not music_folder:
+                print("not")
+                # Link to different music services. Get the preferred service from the user database if available.
+                pass
+            else:
+                # Get the folder path from the sql database and convert it to numpy array before using it.
+                files = os.listdir(music_folder)
+                os.startfile(f"{music_folder}/{random.choice(files)}")
+        elif "game" in query:
+            # import game module and use the different classes for different games.
+            # games.Games.choice()
+            pass
+        else:
+            # Play video online
+            import webbrowser
+            webbrowser.open_new_tab(Search().youtubeVideoSearch(query))
+            pass
+
+
+class Question:
+    def __init__(self, query):
+        # self.checkQuestion()
+        self.classify(query)
+
+    def checkQuestion(self, query=""):
+        """
+        Checks whether the provided query is a question or not.
+        """
+        __temp = False
+        keywords = tuple(Sqlite3(databPath=r"data\database\attributes.db").execute(
+            "SELECT * FROM KEYWORDS;")[0][1].replace("(", "", 1).replace(")", "", 1).split(", "))
+        for word in keywords:
+            # print(word)
+            # print(Tools().reOperation(query, word, "at start"))
+            if Tools().reOperation(query, word, "at start"):
+                print("--------------------------------------------------")
+                __temp = True
+                break
+
+        if __temp:
+            del __temp
+            return True
+        else:
+            del __temp
+            return False
+
+    def classify(self, query):
+        if Tools().reOperation(query, "what", "at start"):
+            chatBot.AnalyseQuestion(type="what", query=query)
