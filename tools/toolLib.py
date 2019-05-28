@@ -21,6 +21,9 @@ web_domains = Sqlite3(databPath=r"data\database\services.db").execute(
 
 
 class Web:
+    """
+    Class that contains tools for the web operations.
+    """
     def __init__(self, query=""):
         self.query = query
         self.__domain_presence = False
@@ -133,10 +136,16 @@ class Web:
 
 
 class Search:
+    """
+    Class that contains the search operation methods to perform various kinds of searching work efficiently.
+    """
     def __init__(self):
         pass
 
     def classify(self, query=""):
+        """
+        Classfies the type of search query provided.
+        """
         # Get it from the database and save it in the form of numpy array before using it.
         sql = Sqlite3(
             databPath=r"F:\Python\AI\assistant\data\database\services.db")
@@ -193,11 +202,18 @@ class Search:
             pass
 
     def searchEngine(self, query="", engine="google"):
+        """
+        Opens the webpage by searching the provideed query on the specified search engine.
+        If no engine is provided it will search the query on Google.
+        """
         query = query.replace(engine, "", 1)
         method = Tools().getSearchMethod(engine)
         webbrowser.open_new_tab(f"https://{engine}.com{method}{query}")
 
     def youtubeVideoSearch(self, query=""):
+        """
+        Opens the youtube video to the provided search query. By default it opens the first video.
+        """
         res = requests.get(
             f"https://youtube.com{Tools().getSearchMethod('youtube')}{query}").text
         soup = bs4.BeautifulSoup(res, "lxml")
@@ -215,10 +231,16 @@ class Search:
 
 
 class Tools:
+    """
+    Class that contains some basic (misc.) tools.
+    """
     def __init__(self):
         pass
 
     def getSearchMethod(self, engine=""):
+        """
+        Returns the search method of the specified search engine from the database.
+        """
         # Get methods from sql database and map them to dicts.
         try:
             return Sqlite3(databPath=r"data\database\services.db").execute(f"SELECT METHOD FROM ENGINES WHERE NAME='{engine.capitalize()}'")[0][0]
@@ -226,6 +248,9 @@ class Tools:
             return Sqlite3(databPath=r"data\database\services.db").execute(f"SELECT METHOD FROM ENGINES WHERE NAME='Google'")[0][0]
 
     def reOperation(self, query, string, method):
+        """
+        Performs some simple regular expressions operations on the specified query.
+        """
         # print(f"re ---> query ---> {query}")
         # print(f"re ---> string ---> {string}")
         __temp = False
@@ -250,6 +275,9 @@ class Tools:
 
 
 class Analyse():
+    """
+    Class that contains analysis tools for the query provided.
+    """
     def __init__(self, query):
         self.query = query
 
@@ -277,8 +305,10 @@ class Analyse():
                 # print("Error")
                 assistant.speak("No internet connection")
         # elif query == "test":
-        elif Tools().reOperation(query, "test", "at start"):
-            print(Question().checkQuestion(query=query.replace("test ---> ", "", 1)))
+        # elif Tools().reOperation(query, "test", "at start"):
+        #     print(Question().checkQuestion(query=query.replace("test ---> ", "", 1)))
+        elif query.split(" ")[0].upper() in tuple(Sqlite3(databPath=r"data\database\attributes.db").execute("SELECT * FROM KEYWORDS;")[0][1].replace("(", "", 1).replace(")", "", 1).split(", ")):
+            Search().searchEngine(query=query)
         else:
             assistant.speak(
                 "I am not able to understand your query at the moment. Please try after future updates.")
