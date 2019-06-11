@@ -18,6 +18,8 @@ from tools.sql_operation import Sqlite3
 #                         ".edu", ".int", ".gov", ".mil", ".arpa"])
 web_domains = Sqlite3(databPath=r"data\database\services.db").execute(
     "SELECT USAGE FROM DOMAIN")
+greet_keywords = np.array(
+                [["Sure!", "Okay!", "Here it is", "Here is what you have demanded"]])
 
 
 class Web:
@@ -214,8 +216,7 @@ class Search:
         """
         Opens the youtube video to the provided search query. By default it opens the first video.
         """
-        res = requests.get(
-            f"https://youtube.com{Tools().getSearchMethod('youtube')}{query}").text
+        res = requests.get(f"https://youtube.com{Tools().getSearchMethod('youtube')}{query}").text
         soup = bs4.BeautifulSoup(res, "lxml")
         links = []
         for link in soup.find_all("a", href=True):
@@ -272,7 +273,27 @@ class Tools:
         else:
             del __temp
             return False
+    
+    def getUserPath(self):
+        from pathlib import Path
+        return str(Path.home())
 
+    def strTolst(self, query):
+        intLst = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+
+        tempLst = query.replace("[", "").replace("]", "").split(", ").copy()
+
+        query = []
+        for element in tempLst:
+            try:
+                if int(element) in intLst:
+                    query.append(int(element))
+                else:
+                    query.append(element)
+            except:
+                query.append(element)
+        del intLst, tempLst
+        return query
 
 class Analyse():
     """
@@ -318,7 +339,24 @@ class Analyse():
         """
         Classifies the query containing "open" keyword.
         """
-        if False:
+        if True:
+            query = query.lower().capitalize()
+            location = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT location FROM PROGRAMS_DATA WHERE name="{query}"')[0][0]
+            try:
+                if location != "":
+                    applicationName = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT fileName FROM PROGRAMS_DATA WHERE name="{query}"')[0][0]
+                    os.startfile(f"{Tools().getUserPath()}\\{location}\\{applicationName}")
+                    assistant.speak(random.choice(greet_keywords[0]))
+                else:
+                    location = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT location FROM PROGRAMS_DATA WHERE shortName="{query}"')[0][0]
+                    if location != "":
+                        applicationName = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT fileName FROM PROGRAMS_DATA WHERE shortName="{query}"')[0][0]
+                        os.startfile(f"{Tools().getUserPath()}\{location}\{applicationName}")
+                        assistant.speak(random.choice(greet_keywords[0]))
+                    else:
+                        raise ValueError
+            except Exception as e:
+                print(f"EXCEPTION ---> {e}")
             # First check for the programs available on the machine.
             pass
         elif Tools().reOperation(query, "webpage", "at start"):
@@ -358,6 +396,8 @@ class Analyse():
             else:
                 print(domain)
 
+
+
     @staticmethod
     def playClassify(query):
         """
@@ -365,11 +405,8 @@ class Analyse():
         """
         if "video" in query:
             # Get the greet keywords from the sql database and convert it to numpy array before using it.
-            greet_keywords = np.array(
-                [["Sure!", "Okay!", "Playing now", "Here it is", "Here is what you have demanded"]])
             # print("Playing")
             assistant.speak(random.choice(greet_keywords[0]))
-
             video_folder = "D:/Videos/Music Videos"
 
             if not video_folder:
@@ -381,8 +418,6 @@ class Analyse():
                 os.startfile(f"{video_folder}/{random.choice(files)}")
         elif "music" in query or "song" in query:
             # Get the greet keywords from the sql database and convert it to numpy array before using it.
-            greet_keywords = np.array(
-                [["Sure!", "Okay!", "Playing now", "Here it is", "Here is what you have demanded"]])
             # print("Playing")
             assistant.speak(random.choice(greet_keywords[0]))
 
@@ -402,9 +437,12 @@ class Analyse():
             pass
         else:
             # Play video online
-            import webbrowser
-            webbrowser.open_new_tab(Search().youtubeVideoSearch(query))
-            pass
+            if Web.checkConnection():
+                import webbrowser
+                webbrowser.open_new_tab(Search().youtubeVideoSearch(query))
+            else:
+                assistant.speak("No internet connection!")
+                # print("No internet connection!")
 
 
 class Question:

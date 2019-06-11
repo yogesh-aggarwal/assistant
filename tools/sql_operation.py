@@ -50,7 +50,11 @@ class Sqlite3:
         conn.commit()
         c.close()
         conn.close()
-        return np.array(data)
+
+        if data != []:
+            return np.array(data)
+        else:
+            return [[""]]
 
     def createDatabase(self, path):
         self.execute("", databPath=path)
