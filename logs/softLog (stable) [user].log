@@ -1,0 +1,23 @@
+-Versions at a glance-
+
+Version 0.1.0:
+    1) Added voice support apart from typing the query.
+    2) Added support for reconizing the query for web searches.
+
+Version 0.1.1:
+    1) Added support for opening webpages.
+    2) Added support for opening music/video files randomly.
+    3) Fixed privacy flaw for linux users.
+    4) Fixed partitial filling of the query.
+
+Version 0.1.2:
+    1) Added web searching facility with Google.
+    2) Added databases for user data processing.
+    3) Patch web open flaw.
+    4) Now can play videos online.
+
+Version 0.1.3 (Current):
+    1) Added application opening facility.
+    2) Added databases to process files.
+    3) Added user data to be used for personalization.
+    4) ...
