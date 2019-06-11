@@ -96,7 +96,7 @@ def take_command():
     """
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        print("Listening...")
+        print("\nListening...")
         r.pause_threshold = 1
         r.energy_threshold = 100
         audio = r.listen(source)
@@ -104,7 +104,7 @@ def take_command():
     try:
         print("Recognizing...")
         query = r.recognize_google(audio, language="en-in")
-        print(f"User said: {query}.\n")
+        print(f"User said: {query}.")
         # return query
         analysis = toolLib.Analyse(query)
         analysis.classify()

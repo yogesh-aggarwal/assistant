@@ -19,13 +19,14 @@ from tools.sql_operation import Sqlite3
 web_domains = Sqlite3(databPath=r"data\database\services.db").execute(
     "SELECT USAGE FROM DOMAIN")
 greet_keywords = np.array(
-                [["Sure!", "Okay!", "Here it is", "Here is what you have demanded"]])
+    [["Sure!", "Okay!", "Here it is", "Here is what you have demanded"]])
 
 
 class Web:
     """
     Class that contains tools for the web operations.
     """
+
     def __init__(self, query=""):
         self.query = query
         self.__domain_presence = False
@@ -141,6 +142,7 @@ class Search:
     """
     Class that contains the search operation methods to perform various kinds of searching work efficiently.
     """
+
     def __init__(self):
         pass
 
@@ -156,21 +158,25 @@ class Search:
         engines = np.array(["google", "bing", "ask", "yahoo", "youtube"])
         services = np.array(["youtube.com", "ganna.com"])
 
-        patt = re.compile(r"^search")
 
+        patt = re.compile(r"^search")
         matches = patt.finditer(query)
 
-        replace = False
+        replace = False  # Garbage
 
         for match in matches:
             if match.span():
                 replace = True
 
         if replace:
-            query = query.replace("search", "", 1)
-        del replace
+            query = query.replace("search", "", 1)  # Removing the "search" keyword from the start of the query
+            del replace
+        else:
+            del replace
+            return "Not a search query"
 
-        engine = ""
+        # Finding the search engine
+        engine = None
         wordList = re.sub(r"[^\w]", " ",  query).split()
 
         for engine_test in engines:
@@ -187,11 +193,13 @@ class Search:
                 self.searchEngine(query=query, engine=engine)
                 break
             else:
+                # Finding the engine at the last of the query
                 for engine_test in engines:
                     if wordList[len(wordList)-1] == engine_test:
                         engine = engine_test
                         break
 
+        # Search engine not found, then will search on Google as the last option.
         if engine not in engines:
             garbage = np.array(["for", "at", "on"])
             for word in garbage:
@@ -200,7 +208,7 @@ class Search:
             self.searchEngine(query=query)
 
         elif True:
-            # More search methods
+            # More search methods other than the search engines.
             pass
 
     def searchEngine(self, query="", engine="google"):
@@ -216,7 +224,8 @@ class Search:
         """
         Opens the youtube video to the provided search query. By default it opens the first video.
         """
-        res = requests.get(f"https://youtube.com{Tools().getSearchMethod('youtube')}{query}").text
+        res = requests.get(
+            f"https://youtube.com{Tools().getSearchMethod('youtube')}{query}").text
         soup = bs4.BeautifulSoup(res, "lxml")
         links = []
         for link in soup.find_all("a", href=True):
@@ -235,6 +244,7 @@ class Tools:
     """
     Class that contains some basic (misc.) tools.
     """
+
     def __init__(self):
         pass
 
@@ -259,21 +269,21 @@ class Tools:
             patt = re.compile(rf"^{string}")
         elif method == "at end":
             patt = re.compile(rf"{string}$")
-        
+
         matches = patt.finditer(query)
         for match in matches:
             if match != None:
                 __temp = True
             else:
                 __temp = False
-        
+
         if __temp:
             del __temp
             return True
         else:
             del __temp
             return False
-    
+
     def getUserPath(self):
         from pathlib import Path
         return str(Path.home())
@@ -295,10 +305,12 @@ class Tools:
         del intLst, tempLst
         return query
 
+
 class Analyse():
     """
     Class that contains analysis tools for the query provided.
     """
+
     def __init__(self, query):
         self.query = query
 
@@ -325,6 +337,8 @@ class Analyse():
             else:
                 # print("Error")
                 assistant.speak("No internet connection")
+        elif query == "exit":
+            quit()
         # elif query == "test":
         # elif Tools().reOperation(query, "test", "at start"):
         #     print(Question().checkQuestion(query=query.replace("test ---> ", "", 1)))
@@ -341,22 +355,46 @@ class Analyse():
         """
         if True:
             query = query.lower().capitalize()
-            location = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT location FROM PROGRAMS_DATA WHERE name="{query}"')[0][0]
+            location = Sqlite3(databPath=r"data\database\programInstallData.db").execute(
+                f'SELECT location FROM PROGRAMS_DATA WHERE name="{query}"')[0][0]
             try:
                 if location != "":
                     applicationName = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT fileName FROM PROGRAMS_DATA WHERE name="{query}"')[0][0]
-                    os.startfile(f"{Tools().getUserPath()}\\{location}\\{applicationName}")
-                    assistant.speak(random.choice(greet_keywords[0]))
-                else:
-                    location = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT location FROM PROGRAMS_DATA WHERE shortName="{query}"')[0][0]
-                    if location != "":
-                        applicationName = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT fileName FROM PROGRAMS_DATA WHERE shortName="{query}"')[0][0]
-                        os.startfile(f"{Tools().getUserPath()}\{location}\{applicationName}")
+                    method = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT locationMethod FROM PROGRAMS_DATA WHERE name="{query}"')
+                    if method == "user":
+                        os.startfile(
+                            f"{Tools().getUserPath()}\\{location}\\{applicationName}")
                         assistant.speak(random.choice(greet_keywords[0]))
                     else:
-                        raise ValueError
+                        os.startfile(
+                            f"{location}\\{applicationName}")
+                        assistant.speak(random.choice(greet_keywords[0]))
+                else:
+                    for shortNameCount in range(1, 7):
+                        location = Sqlite3(databPath=r"data\database\programInstallData.db").execute(
+                            f'SELECT location FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0]
+                        if location != "":
+                            applicationName = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT fileName FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0]
+                            method = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT locationMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0]
+
+                            if method == "user":
+                                os.startfile(
+                                    f"{Tools().getUserPath()}\\{location}\\{applicationName}")
+                                assistant.speak(random.choice(greet_keywords[0]))
+                                break
+                            else:
+                                os.startfile(
+                                    f"{location}\\{applicationName}")
+                                assistant.speak(random.choice(greet_keywords[0]))
+                                break
+                        else:
+                            if shortNameCount == 6:
+                                assistant.speak("Application doesn't exits")
+                            # raise ValueError
             except Exception as e:
-                print(f"EXCEPTION ---> {e}")
+                assistant.speak("Application doesn't exists")
+                # print(f"EXCEPTION ---> {e}")
+                pass
             # First check for the programs available on the machine.
             pass
         elif Tools().reOperation(query, "webpage", "at start"):
@@ -395,8 +433,6 @@ class Analyse():
                 webbrowser.open_new_tab("https://" + query + domain)
             else:
                 print(domain)
-
-
 
     @staticmethod
     def playClassify(query):
@@ -469,4 +505,3 @@ class Question:
         else:
             del __temp
             return False
-
