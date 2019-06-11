@@ -101,21 +101,23 @@ def take_command():
         r.energy_threshold = 100
         audio = r.listen(source)
 
+    query = None
+
     try:
         print("Recognizing...")
         query = r.recognize_google(audio, language="en-in")
         print(f"User said: {query}.")
         # return query
+    except Exception as e:
+        print(f"EXCEPTION (assistant.py) ---> {e}")
+        if e:
+            speak("Sorry! could not recognise that. Say that again please.")
+    
+    try:
         analysis = toolLib.Analyse(query)
         analysis.classify()
     except Exception as e:
-        # print(f"EXCEPTION (assistant.py) ---> {e}")
-        # print("Sorry! could not recognise that. Say that again please.")
-        speak("Sorry! could not recognise that. Say that again please.")
-        return None
-
-    # analyse(query.lower())
-
+        print(e)
 
 if __name__ == "__main__":
     # wish()

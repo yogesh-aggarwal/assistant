@@ -158,7 +158,6 @@ class Search:
         engines = np.array(["google", "bing", "ask", "yahoo", "youtube"])
         services = np.array(["youtube.com", "ganna.com"])
 
-
         patt = re.compile(r"^search")
         matches = patt.finditer(query)
 
@@ -169,7 +168,8 @@ class Search:
                 replace = True
 
         if replace:
-            query = query.replace("search", "", 1)  # Removing the "search" keyword from the start of the query
+            # Removing the "search" keyword from the start of the query
+            query = query.replace("search", "", 1)
             del replace
         else:
             del replace
@@ -220,12 +220,34 @@ class Search:
         method = Tools().getSearchMethod(engine)
         webbrowser.open_new_tab(f"https://{engine}.com{method}{query}")
 
-    def youtubeVideoSearch(self, query=""):
+    def VideoSearch(self, query="", service=""):
         """
-        Opens the youtube video to the provided search query. By default it opens the first video.
+        Returns the url of the video of the trending(according to the database [services.db]) video engine. By default it opens the first video.
         """
-        res = requests.get(
-            f"https://youtube.com{Tools().getSearchMethod('youtube')}{query}").text
+        if not service:
+            host = Sqlite3(databPath=r"data\database\services.db").execute(
+                f"SELECT host FROM VIDEO_SERVICES WHERE rank=1")[0][0]
+        else:
+            host = Sqlite3(databPath=r"data\database\services.db").execute(
+                f"SELECT host FROM VIDEO_SERVICES WHERE name='{service}'")[0][0]
+
+        searchMethod = Sqlite3(databPath=r"data\database\services.db").execute(
+            f"SELECT searchMethod FROM VIDEO_SERVICES WHERE host='{host}'")[0][0]
+        playMethod = Sqlite3(databPath=r"data\database\services.db").execute(
+            f"SELECT playMethod FROM VIDEO_SERVICES WHERE host='{host}'")[0][0]
+
+        if not searchMethod:
+            assistant.speak("The video service doesn't exists. So I am opening it on other service.")
+            host = Sqlite3(databPath=r"data\database\services.db").execute(
+                f"SELECT host FROM VIDEO_SERVICES WHERE rank=1")[0][0]
+            searchMethod = Sqlite3(databPath=r"data\database\services.db").execute(
+                f"SELECT searchMethod FROM VIDEO_SERVICES WHERE rank=1")[0][0]
+            playMethod = Sqlite3(databPath=r"data\database\services.db").execute(
+                f"SELECT playMethod FROM VIDEO_SERVICES WHERE rank=1")[0][0]
+        
+        link = f'{host}{searchMethod}{query}'
+        
+        res = requests.get(f'{host}{searchMethod}{query}').text
         soup = bs4.BeautifulSoup(res, "lxml")
         links = []
         for link in soup.find_all("a", href=True):
@@ -233,11 +255,14 @@ class Search:
         vid = ""
 
         for link in links:
-            if "/watch?v=" in link:
+            if playMethod in link:
+                print(link)
                 vid = link
                 break
 
-        return f"https://www.youtube.com{vid}"
+        # print(links)
+
+        return f"{host}{vid}"
 
 
 class Tools:
@@ -284,6 +309,7 @@ class Tools:
             del __temp
             return False
 
+    @property
     def getUserPath(self):
         from pathlib import Path
         return str(Path.home())
@@ -338,6 +364,7 @@ class Analyse():
                 # print("Error")
                 assistant.speak("No internet connection")
         elif query == "exit":
+            assistant.speak("See you again.")
             quit()
         # elif query == "test":
         # elif Tools().reOperation(query, "test", "at start"):
@@ -359,11 +386,13 @@ class Analyse():
                 f'SELECT location FROM PROGRAMS_DATA WHERE name="{query}"')[0][0]
             try:
                 if location != "":
-                    applicationName = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT fileName FROM PROGRAMS_DATA WHERE name="{query}"')[0][0]
-                    method = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT locationMethod FROM PROGRAMS_DATA WHERE name="{query}"')
+                    applicationName = Sqlite3(databPath=r"data\database\programInstallData.db").execute(
+                        f'SELECT fileName FROM PROGRAMS_DATA WHERE name="{query}"')[0][0]
+                    method = Sqlite3(databPath=r"data\database\programInstallData.db").execute(
+                        f'SELECT locationMethod FROM PROGRAMS_DATA WHERE name="{query}"')
                     if method == "user":
                         os.startfile(
-                            f"{Tools().getUserPath()}\\{location}\\{applicationName}")
+                            f"{Tools().getUserPath}\\{location}\\{applicationName}")
                         assistant.speak(random.choice(greet_keywords[0]))
                     else:
                         os.startfile(
@@ -374,18 +403,22 @@ class Analyse():
                         location = Sqlite3(databPath=r"data\database\programInstallData.db").execute(
                             f'SELECT location FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0]
                         if location != "":
-                            applicationName = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT fileName FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0]
-                            method = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT locationMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0]
+                            applicationName = Sqlite3(databPath=r"data\database\programInstallData.db").execute(
+                                f'SELECT fileName FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0]
+                            method = Sqlite3(databPath=r"data\database\programInstallData.db").execute(
+                                f'SELECT locationMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0]
 
                             if method == "user":
                                 os.startfile(
-                                    f"{Tools().getUserPath()}\\{location}\\{applicationName}")
-                                assistant.speak(random.choice(greet_keywords[0]))
+                                    f"{Tools().getUserPath}\\{location}\\{applicationName}")
+                                assistant.speak(
+                                    random.choice(greet_keywords[0]))
                                 break
                             else:
                                 os.startfile(
                                     f"{location}\\{applicationName}")
-                                assistant.speak(random.choice(greet_keywords[0]))
+                                assistant.speak(
+                                    random.choice(greet_keywords[0]))
                                 break
                         else:
                             if shortNameCount == 6:
@@ -472,12 +505,14 @@ class Analyse():
             # games.Games.choice()
             pass
         else:
+            # print(Search().VideoSearch(query, service="YouTube"))
+            webbrowser.open_new_tab(Search().VideoSearch(query, service="YouTube"))
             # Play video online
-            if Web.checkConnection():
-                import webbrowser
-                webbrowser.open_new_tab(Search().youtubeVideoSearch(query))
-            else:
-                assistant.speak("No internet connection!")
+            # if Web.checkConnection():
+            #     import webbrowser
+            #     webbrowser.open_new_tab(Search().VideoSearch(query))
+            # else:
+            #     assistant.speak("No internet connection!")
                 # print("No internet connection!")
 
 

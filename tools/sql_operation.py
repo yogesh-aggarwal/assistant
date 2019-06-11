@@ -28,6 +28,10 @@ class Sqlite3:
         else:
             self.databPath = os.path._getfullpathname(databPath)
 
+    @property
+    def path(self):
+        return self.databPath
+
     def execute(self, command, databPath=""):
         if not databPath:
             databPath = self.databPath
