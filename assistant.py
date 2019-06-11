@@ -52,17 +52,6 @@ class Features:
         while True:
             take_command()
 
-    def send_email(self, email_address):
-        pass
-
-    def play_music(self, baseDir):
-        files = os.listdir(baseDir)
-        file = random.choice(files)
-        print(f"baseDir ---> {baseDir}")
-        print(f"file ---> {file}")
-        os.startfile(os.path.join(baseDir, file))
-        pass
-
     def play_video(self, file_name):
         pass
 
@@ -72,23 +61,6 @@ class Features:
     def current_time(self):
         pass
 
-    def search_wiki(self, query):
-        results = wikipedia.wikipedia.summary(query, sentences=2)
-        print(results)
-        speak(f"According to Wikipedia - {results}")
-
-    def open_webpage(self, address):
-        print(f"Opened ---> {address}")
-        # for i in domains:
-        #     try:
-        #         address.replace(i, "")
-        #     except:
-        #         pass
-
-        if ("http" not in address):
-            webbrowser.open(f"http://{address}", new=2)
-        else:
-            webbrowser.open(address, new=2)
 
 
     def open_soft(self, soft_name):
@@ -126,17 +98,20 @@ def take_command():
     with sr.Microphone() as source:
         print("Listening...")
         r.pause_threshold = 1
-        r.energy_threshold = 500
+        r.energy_threshold = 100
         audio = r.listen(source)
 
     try:
         print("Recognizing...")
         query = r.recognize_google(audio, language="en-in")
-        print(f"User said: {query}.")
+        print(f"User said: {query}.\n")
+        # return query
+        analysis = toolLib.Analyse(query)
+        analysis.classify()
     except Exception as e:
-        print(e)
-        print("Sorry! could not recognise that. Say that again please.")
-        # speak("Sorry! could not recognise that. Say that again please.")
+        # print(f"EXCEPTION (assistant.py) ---> {e}")
+        # print("Sorry! could not recognise that. Say that again please.")
+        speak("Sorry! could not recognise that. Say that again please.")
         return None
 
     # analyse(query.lower())
@@ -144,11 +119,11 @@ def take_command():
 
 if __name__ == "__main__":
     # wish()
-    # take_command()
-    # features.keep_asking()
-    query = input("Enter the query ---> ").lower()
+    # query = take_command()
+    features.keep_asking()
+    # query = input("Enter the query ---> ").lower()
 
-    analysis = toolLib.Analyse(query)
-    analysis.classify()
+    # analysis = toolLib.Analyse(query)
+    # analysis.classify()
     
     # analyse("play")

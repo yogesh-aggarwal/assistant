@@ -8,4 +8,3 @@ A Machine Learning and AI powered virtual assistant
 * Can interact with you like real humans.
 * Can answer your questions.
 * And a lot more features.
-
