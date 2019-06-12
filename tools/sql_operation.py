@@ -1,3 +1,9 @@
+"""
+An integrative library that contains tools for performing various tasks related to the relations (table records).
+    * Integrated with Assistant
+    * Inbuilt feature of Jarvis AI Poject.
+"""
+
 import os
 import shutil
 import sqlite3

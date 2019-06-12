@@ -1,7 +1,7 @@
 """
 Jarvis AI project.
-    Automates the tasks command by the user through speech.
-    Uses connectivity to work properly.
+    * Automates the tasks command by the user through speech.
+    * Uses connectivity to work properly.
     
     Features-
         1) Send E-Mails.
@@ -14,6 +14,7 @@ import datetime
 import os
 import random
 import re
+import sys
 import webbrowser
 
 import numpy as np

@@ -1,3 +1,15 @@
+"""
+An integrative library which contains games that are operated by the user through the assistant.
+    * Integrated with Assistant
+    * Inbuilt feature of Jarvis AI Poject.
+"""
+
+def path():
+    import sys
+    import os
+    sys.path.append(os.getcwd())
+path()
+
 import os
 import sys
 

@@ -1,3 +1,19 @@
+"""
+Chatbot AI Project.
+    * Integrated with Assistant
+    * Inbuilt feature of Jarvis AI Poject.
+Some features are-
+    1) Interact with humans.
+    2) Can give some interesting stuff to the user.
+    3) ______
+"""
+
+def path():
+    import sys
+    import os
+    sys.path.append(os.getcwd())
+path()
+
 import datetime
 import os
 import random
@@ -20,18 +36,6 @@ import tools.toolLib
 from tools.sql_operation import Sqlite3 as sql
 
 # from . import faceRecognition as fr
-
-
-"""
-Chatbot AI Project.
-* Integrated with Assistant
-* Inbuilt feature of Jarvis AI Poject.
-Some features are-
-    1) Interact with humans.
-    2) Can give some interesting stuff to the user.
-    3) ______
-"""
-
 
 class Greet:
     def __init__(self):

@@ -1,3 +1,15 @@
+"""
+An integrative library that contains the tools required to work the assistant.
+    * Integrated with Assistant
+    * Inbuilt feature of Jarvis AI Poject.
+"""
+
+def path():
+    import sys
+    import os
+    sys.path.append(os.getcwd())
+path()
+
 import os
 import random
 import re
@@ -198,12 +210,6 @@ class Search:
 
         if engine != None:
             self.searchEngine(query=searchQuery, engine=engine)
-
-
-                
-
-
-        
 
     def searchEngine(self, query="", engine="Google"):
         """
