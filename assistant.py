@@ -21,6 +21,8 @@ import pyttsx3
 import requests
 import speech_recognition as sr
 import wikipedia
+from gtts import gTTS
+from playsound import playsound
 
 from tools import toolLib
 
@@ -60,14 +62,21 @@ class Features:
     def current_time(self):
         pass
 
+
 features = Features()
+
 
 def speak(audio):
     """
     Speaks the string provided.
     """
+    # tts = gTTS(text=audio, lang='en')
+    # tts.save("assistant.mp3")
+    # playsound("assistant.mp3")
+
     engine.say(audio)
     engine.runAndWait()
+
 
 def wish():
     """
@@ -106,8 +115,8 @@ def take_command(method="voice"):
         except Exception as e:
             print(f"EXCEPTION (assistant.py) ---> {e}")
             if e:
-                speak("Sorry! could not recognise that. Say that again please.")
-    
+                speak("Sorry about that, I didn't hear anything.")
+
     else:
         query = input("Enter the query ---> ").lower()
 
@@ -117,9 +126,12 @@ def take_command(method="voice"):
     except Exception as e:
         print(e)
 
+
 if __name__ == "__main__":
+    speak("I am Jarvis! How can I help you?")
     # wish()
-    take_command(method="console")
-    features.keep_asking(method="console")
+    # take_command(method="console")
+    # features.keep_asking(method="console")
 
-
+    take_command()
+    # features.keep_asking()

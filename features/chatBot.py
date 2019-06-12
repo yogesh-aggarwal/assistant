@@ -15,10 +15,11 @@ import sklearn
 import wikipedia
 
 import assistant
-# import faceRecognition as fr
 import share
-# import tools.toolLib
+import tools.toolLib
 from tools.sql_operation import Sqlite3 as sql
+
+# from . import faceRecognition as fr
 
 
 """
@@ -27,7 +28,7 @@ Chatbot AI Project.
 * Inbuilt feature of Jarvis AI Poject.
 Some features are-
     1) Interact with humans.
-    2) Can give some interesting stuff to the application of the user.
+    2) Can give some interesting stuff to the user.
     3) ______
 """
 

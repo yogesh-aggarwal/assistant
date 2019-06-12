@@ -153,72 +153,64 @@ class Search:
         """
         Classfies the type of search query provided.
         """
-        # Get it from the database and save it in the form of numpy array before using it.
         sql = Sqlite3(
             databPath=r"F:\Python\AI\assistant\data\database\services.db")
-        # print(sql)
+        engines = tuple(sql.execute("SELECT name FROM ENGINES", matrix=False, inlineData=True))
 
-        engines = np.array(["google", "bing", "ask", "yahoo", "youtube"])
-        services = np.array(["youtube.com", "ganna.com"])
-
-        patt = re.compile(r"^search")
-        matches = patt.finditer(query)
-
-        replace = False  # Garbage
-
-        for match in matches:
-            if match.span():
-                replace = True
-
-        if replace:
-            # Removing the "search" keyword from the start of the query
-            query = query.replace("search", "", 1)
-            del replace
-        else:
-            del replace
-            return "Not a search query"
-
-        # Finding the search engine
+        query = query.lower().replace("search", "").strip()
+        wordList = query.split(" ")
         engine = None
-        wordList = re.sub(r"[^\w]", " ",  query).split()
+        
+        for i in range(len(wordList)):
+            try:
+                if wordList[0] in ["for", "at", "on"]:
+                    wordList.pop(0)
+            except:
+                pass
 
-        for engine_test in engines:
-            if wordList[0] == engine_test:
-                engine = engine_test
-                break
+        for __engine in engines:
+            if wordList[0].capitalize() == __engine:  # Check if the search engine is at the start of the query.
+                queryType = "Search"
+                for __engine in engines:
+                    if wordList[len(wordList)-1].capitalize() == __engine:  # Checking if there is more than one engines present in the query, at start & at end.
+                        if wordList[len(wordList)-2] in ["on", "at"]:  # Check if it contains the keywords that signifies that the word is the engine.
+                            engine = wordList[len(wordList)-1].capitalize()
+                            break
+                        else:
+                            engine = wordList[0].capitalize()  # The search engine is at the start
+                    else:
+                        engine = wordList[0].capitalize()  # The search engine is at the start
 
-        for count in range(2):
-            if engine:
-                garbage = np.array(["for", "at", "on"])
-                for word in garbage:
-                    query = query.replace(word, "", 1)
-                del garbage
-                self.searchEngine(query=query, engine=engine)
+            elif wordList[len(wordList)-1].capitalize == __engine:  # Checking if the searching engine is not at start but at the last.
+                queryType = "Search"
+                engine = __engine
                 break
+            
             else:
-                # Finding the engine at the last of the query
-                for engine_test in engines:
-                    if wordList[len(wordList)-1] == engine_test:
-                        engine = engine_test
-                        break
+                queryType = "Not search"
 
-        # Search engine not found, then will search on Google as the last option.
-        if engine not in engines:
-            garbage = np.array(["for", "at", "on"])
-            for word in garbage:
-                query = query.replace(word, "", 1)
-            del garbage
-            self.searchEngine(query=query)
+        wordList.remove(engine.lower())
 
-        elif True:
-            # More search methods other than the search engines.
-            pass
+        if wordList[0] in ["for", "at", "on"]:
+            wordList.pop(0)
 
-    def searchEngine(self, query="", engine="google"):
+        searchQuery = " ".join(wordList)
+
+        if engine != None:
+            self.searchEngine(query=searchQuery, engine=engine)
+
+
+                
+
+
+        
+
+    def searchEngine(self, query="", engine="Google"):
         """
         Opens the webpage by searching the provideed query on the specified search engine.
         If no engine is provided it will search the query on Google.
         """
+        engine = engine.lower()
         query = query.replace(engine, "", 1)
         method = Tools().getSearchMethod(engine)
         webbrowser.open_new_tab(f"https://{engine}.com{method}{query}")
@@ -368,19 +360,18 @@ class Analyse:
             else:
                 # print("Error")
                 assistant.speak("No internet connection")
+        
         elif query == "exit":
             assistant.speak("See you again.")
             quit()
-        elif query == "test":
-            pass
-            # print(Tools().reOperation("play the hook up song", ["music","song"], "at end"))
-        # elif Tools().reOperation(query, "test", "at start"):
-        #     print(Question().checkQuestion(query=query.replace("test ---> ", "", 1)))
+        
+        elif "test" in query:
+            Search().classify(query=query.replace("test ", ""))
+
         elif query.split(" ")[0].upper() in tuple(Sqlite3(databPath=r"data\database\attributes.db").execute("SELECT * FROM KEYWORDS;")[0][1].replace("(", "", 1).replace(")", "", 1).split(", ")):
             Search().searchEngine(query=query)
         else:
-            assistant.speak(
-                "I am not able to understand your query at the moment. Please try after future updates.")
+            assistant.speak("I am not able to understand your query at the moment. Please try after future updates.")
 
     @staticmethod
     def openClassify(query):

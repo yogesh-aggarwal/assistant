@@ -32,7 +32,7 @@ class Sqlite3:
     def path(self):
         return self.databPath
 
-    def execute(self, command, databPath=""):
+    def execute(self, command, databPath="", matrix=True, inlineData=False):
         if not databPath:
             databPath = self.databPath
         else:
@@ -56,7 +56,18 @@ class Sqlite3:
         conn.close()
 
         if data != []:
-            return np.array(data)
+            if matrix:
+                return np.array(data)
+            else:
+                __temp = []
+                if inlineData:
+                    for i in range(len(data)):
+                        __temp.append(data[i][0])
+                    data = __temp.copy()
+                    del __temp
+                    return data
+                else:
+                    return data
         else:
             return [[""]]
 

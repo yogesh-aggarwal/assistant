@@ -3,7 +3,7 @@ import sys
 
 import numpy as np
 import pandas as pd
-# import sql_operation
+from tools.sql_operation import Sqlite3 as sql
 
 # import pygame
 
@@ -19,7 +19,7 @@ class Games:
     
     @staticmethod
     def store_score(score):
-        sql_operation.sql("")
+        pass
 
     def start(self, name):
         # Start the game provided
