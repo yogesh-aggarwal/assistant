@@ -1,3 +1,0 @@
-1) Can support multiple directories for playing random.
-    Implementation(Python): "Can be done by importing os module and combining the list of all the files in the multiple files & then picking the random file."
-2) 
