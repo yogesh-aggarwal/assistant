@@ -13,9 +13,9 @@ import features.chatBot as chatBot
 import features.faceRecognition as fr
 from tools.sql_operation import Sqlite3
 
-web_domains = Sqlite3(databPath=r"data\database\services.db").execute(
+webDomains = Sqlite3(databPath=r"data\database\services.db").execute(
     "SELECT USAGE FROM DOMAIN")
-greet_keywords = np.array(
+greetKeywords = np.array(
     [["Sure!", "Okay!", "Here it is", "Here is what you have demanded"]])
 
 
@@ -73,7 +73,7 @@ class Web:
             query = self.query.replace("webpage ", "")
 
         if self.checkConnection():
-            for domain in web_domains:
+            for domain in webDomains:
                 domain = domain[0]
                 if domain not in query:
                     self.__domain_presence = False
@@ -81,7 +81,7 @@ class Web:
                     self.__domain_presence = True
                     break
 
-            for domain in web_domains:
+            for domain in webDomains:
                 domain = domain[0]
                 if not self.__domain_presence:
                     try:
@@ -115,7 +115,7 @@ class Web:
         __domain_presence = False
         __domain = ""
 
-        for domain in web_domains:
+        for domain in webDomains:
             domain = domain[0]
             if Tools().reOperation(query, domain, "at end"):
                 __domain = domain
@@ -123,7 +123,7 @@ class Web:
                 break
 
         if not __domain_presence:
-            for domain in web_domains:
+            for domain in webDomains:
                 domain = domain[0]
                 if Web().checkWebExists(query=query + domain) == True:
                     return domain
@@ -134,6 +134,12 @@ class Web:
         else:
             return ""
 
+    def playOnline(self, query, objType="video", service="YouTube"):
+        if Web.checkConnection():
+            import webbrowser
+            webbrowser.open_new_tab(Search().VideoSearch(query, service="YouTube"))
+        else:
+            assistant.speak("You don't have internet connection!")
 
 class Search:
     """
@@ -281,18 +287,25 @@ class Tools:
         """
         Performs some simple regular expressions operations on the specified query.
         """
-        __temp = False
-        if method == "at start":
-            patt = re.compile(rf"^{string}")
-        elif method == "at end":
-            patt = re.compile(rf"{string}$")
+        if type(string) is str:
+            __temp = []
+            __temp.append(string)
+            string = __temp.copy()
+            del __temp
 
-        matches = patt.finditer(query)
-        for match in matches:
-            if match != None:
-                __temp = True
-            else:
-                __temp = False
+        __temp = False
+        for count in range(len(string)):
+            if method == "at start":
+                patt = re.compile(rf"^{string[count]}")
+            elif method == "at end":
+                patt = re.compile(rf"{string[count]}$")
+
+            matches = patt.finditer(query)
+            for match in matches:
+                if match != None:
+                    __temp = True
+                else:
+                    __temp = False
 
         if __temp:
             del __temp
@@ -332,7 +345,7 @@ class Analyse:
     def __init__(self, query):
         self.query = query
 
-    def classify(self, web_domains=web_domains):
+    def classify(self, webDomains=webDomains):
         """
         Classifies the string provided to different categories.
         """
@@ -358,7 +371,9 @@ class Analyse:
         elif query == "exit":
             assistant.speak("See you again.")
             quit()
-        # elif query == "test":
+        elif query == "test":
+            pass
+            # print(Tools().reOperation("play the hook up song", ["music","song"], "at end"))
         # elif Tools().reOperation(query, "test", "at start"):
         #     print(Question().checkQuestion(query=query.replace("test ---> ", "", 1)))
         elif query.split(" ")[0].upper() in tuple(Sqlite3(databPath=r"data\database\attributes.db").execute("SELECT * FROM KEYWORDS;")[0][1].replace("(", "", 1).replace(")", "", 1).split(", ")):
@@ -385,11 +400,11 @@ class Analyse:
                     if method == "user":
                         os.startfile(
                             f"{Tools().getUserPath}\\{location}\\{applicationName}")
-                        assistant.speak(random.choice(greet_keywords[0]))
+                        assistant.speak(random.choice(greetKeywords[0]))
                     else:
                         os.startfile(
                             f"{location}\\{applicationName}")
-                        assistant.speak(random.choice(greet_keywords[0]))
+                        assistant.speak(random.choice(greetKeywords[0]))
                 else:
                     for shortNameCount in range(1, 7):
                         location = Sqlite3(databPath=r"data\database\programInstallData.db").execute(
@@ -404,13 +419,13 @@ class Analyse:
                                 os.startfile(
                                     f"{Tools().getUserPath}\\{location}\\{applicationName}")
                                 assistant.speak(
-                                    random.choice(greet_keywords[0]))
+                                    random.choice(greetKeywords[0]))
                                 break
                             else:
                                 os.startfile(
                                     f"{location}\\{applicationName}")
                                 assistant.speak(
-                                    random.choice(greet_keywords[0]))
+                                    random.choice(greetKeywords[0]))
                                 break
                         else:
                             if shortNameCount == 6:
@@ -422,6 +437,7 @@ class Analyse:
                 pass
             # First check for the programs available on the machine.
             pass
+        
         elif Tools().reOperation(query, "webpage", "at start"):
             if Web(query).checkWebExists() == "No internet connection":
                 assistant.speak("No internet connection")
@@ -429,6 +445,7 @@ class Analyse:
                 print("Open webpage")
             else:
                 print("Webpage does not exists")
+        
         elif Tools().reOperation(query, "my", "at start"):
             query = query.replace("my", "", 1)
             if "folder" in query:
@@ -450,6 +467,7 @@ class Analyse:
                     # Get the file from the sql database.
                     file = r"test\files\image\img_1.jpg"
                     os.startfile(file)
+        
         else:
             query = query.replace("go to", "", 1).replace(
                 "https://", "", 1).replace("http://", "", 1).replace(" ", "")
@@ -467,7 +485,7 @@ class Analyse:
         if "video" in query:
             # Get the greet keywords from the sql database.
             # print("Playing")
-            assistant.speak(random.choice(greet_keywords[0]))
+            assistant.speak(random.choice(greetKeywords[0]))
             video_folder = "D:/Videos/Music Videos"
 
             if not video_folder:
@@ -477,29 +495,33 @@ class Analyse:
                 # Get the folder path from the sql database.
                 files = os.listdir(video_folder)
                 os.startfile(f"{video_folder}/{random.choice(files)}")
+        
         elif "music" in query or "song" in query:
-            assistant.speak(random.choice(greet_keywords[0]))
+            if Tools().reOperation(query, ["music", "song"], "at start"):
+                assistant.speak(random.choice(greetKeywords[0]))
 
-            music_folder = "D:/Music/All time Music"
+                music_folder = "D:/Music/All time Music"
 
-            if not music_folder:
-                print("No folder available for playing song.")
-                # Link to different music services. Get the preferred service from the user database if available.
+                if not music_folder:
+                    print("No folder available for playing song.")
+                    Web().playOnline(query, objType="music")
+                    # Link to different music services. Get the preferred service from the user database if available.
+                else:
+                    # Get the folder path from the sql database.
+                    files = os.listdir(music_folder)
+                    os.startfile(f"{music_folder}/{random.choice(files)}")
             else:
-                # Get the folder path from the sql database.
-                files = os.listdir(music_folder)
-                os.startfile(f"{music_folder}/{random.choice(files)}")
+                Web().playOnline(query)
+                assistant.speak(random.choice(greetKeywords[0]))
+                
         elif "game" in query:
             # import game module and use the different classes for different games.
             # games.Games.choice()
             pass
+        
         else:
-            # Play video online
-            if Web.checkConnection():
-                import webbrowser
-                webbrowser.open_new_tab(Search().VideoSearch(query, service="YouTube"))
-            else:
-                assistant.speak("You don't have internet connection!")
+            Web().playOnline(query)
+            assistant.speak(random.choice(greetKeywords[0]))
 
 
 class Question:
