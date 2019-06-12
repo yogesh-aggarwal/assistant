@@ -55,6 +55,8 @@ class Sqlite3:
         c.close()
         conn.close()
 
+        print(data)
+
         if data != []:
             return np.array(data)
         else:
