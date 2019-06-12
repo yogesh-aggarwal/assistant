@@ -13,9 +13,6 @@ import features.chatBot as chatBot
 import features.faceRecognition as fr
 from tools.sql_operation import Sqlite3
 
-# Garbage
-# web_domains = np.array([".com", ".in", ".org", ".net",
-#                         ".edu", ".int", ".gov", ".mil", ".arpa"])
 web_domains = Sqlite3(databPath=r"data\database\services.db").execute(
     "SELECT USAGE FROM DOMAIN")
 greet_keywords = np.array(
@@ -256,11 +253,8 @@ class Search:
 
         for link in links:
             if playMethod in link:
-                print(link)
                 vid = link
                 break
-
-        # print(links)
 
         return f"{host}{vid}"
 
@@ -287,8 +281,6 @@ class Tools:
         """
         Performs some simple regular expressions operations on the specified query.
         """
-        # print(f"re ---> query ---> {query}")
-        # print(f"re ---> string ---> {string}")
         __temp = False
         if method == "at start":
             patt = re.compile(rf"^{string}")
@@ -332,7 +324,7 @@ class Tools:
         return query
 
 
-class Analyse():
+class Analyse:
     """
     Class that contains analysis tools for the query provided.
     """
@@ -473,7 +465,7 @@ class Analyse():
         Classifies the query containing "play" keyword.
         """
         if "video" in query:
-            # Get the greet keywords from the sql database and convert it to numpy array before using it.
+            # Get the greet keywords from the sql database.
             # print("Playing")
             assistant.speak(random.choice(greet_keywords[0]))
             video_folder = "D:/Videos/Music Videos"
@@ -482,22 +474,19 @@ class Analyse():
                 # Link to different video services. Get the preferred service from the user database if available.
                 pass
             else:
-                # Get the folder path from the sql database and convert it to numpy array before using it.
+                # Get the folder path from the sql database.
                 files = os.listdir(video_folder)
                 os.startfile(f"{video_folder}/{random.choice(files)}")
         elif "music" in query or "song" in query:
-            # Get the greet keywords from the sql database and convert it to numpy array before using it.
-            # print("Playing")
             assistant.speak(random.choice(greet_keywords[0]))
 
             music_folder = "D:/Music/All time Music"
 
             if not music_folder:
-                print("not")
+                print("No folder available for playing song.")
                 # Link to different music services. Get the preferred service from the user database if available.
-                pass
             else:
-                # Get the folder path from the sql database and convert it to numpy array before using it.
+                # Get the folder path from the sql database.
                 files = os.listdir(music_folder)
                 os.startfile(f"{music_folder}/{random.choice(files)}")
         elif "game" in query:
@@ -505,15 +494,12 @@ class Analyse():
             # games.Games.choice()
             pass
         else:
-            # print(Search().VideoSearch(query, service="YouTube"))
-            webbrowser.open_new_tab(Search().VideoSearch(query, service="YouTube"))
             # Play video online
-            # if Web.checkConnection():
-            #     import webbrowser
-            #     webbrowser.open_new_tab(Search().VideoSearch(query))
-            # else:
-            #     assistant.speak("No internet connection!")
-                # print("No internet connection!")
+            if Web.checkConnection():
+                import webbrowser
+                webbrowser.open_new_tab(Search().VideoSearch(query, service="YouTube"))
+            else:
+                assistant.speak("You don't have internet connection!")
 
 
 class Question:

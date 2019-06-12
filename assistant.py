@@ -18,7 +18,6 @@ import webbrowser
 
 import numpy as np
 import pyttsx3
-# import sqlite3  # For storing user preferences.
 import requests
 import speech_recognition as sr
 import wikipedia
@@ -45,12 +44,12 @@ class Features:
         speak("Bye! See you again.")
         quit()
 
-    def keep_asking(self):
+    def keep_asking(self, method="voice"):
         """
         This function makes the assistant keep asking the user commands i.e. not terminates after the given task is compeleted.
         """
         while True:
-            take_command()
+            take_command(method=method)
 
     def play_video(self, file_name):
         pass
@@ -59,11 +58,6 @@ class Features:
         pass
 
     def current_time(self):
-        pass
-
-
-
-    def open_soft(self, soft_name):
         pass
 
 features = Features()
@@ -90,29 +84,33 @@ def wish():
     # speak("I am Jarvis! How can I help you?")
 
 
-def take_command():
+def take_command(method="voice"):
     """
     It takes voice input from user and returns string version of it.
     """
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        print("\nListening...")
-        r.pause_threshold = 1
-        r.energy_threshold = 100
-        audio = r.listen(source)
+    if method == "voice":
+        r = sr.Recognizer()
+        with sr.Microphone() as source:
+            print("\nListening...")
+            r.pause_threshold = 1
+            r.energy_threshold = 100
+            audio = r.listen(source)
 
-    query = None
+        query = None
 
-    try:
-        print("Recognizing...")
-        query = r.recognize_google(audio, language="en-in")
-        print(f"User said: {query}.")
-        # return query
-    except Exception as e:
-        print(f"EXCEPTION (assistant.py) ---> {e}")
-        if e:
-            speak("Sorry! could not recognise that. Say that again please.")
+        try:
+            print("Recognizing...")
+            query = r.recognize_google(audio, language="en-in")
+            print(f"User said: {query}.")
+            # return query
+        except Exception as e:
+            print(f"EXCEPTION (assistant.py) ---> {e}")
+            if e:
+                speak("Sorry! could not recognise that. Say that again please.")
     
+    else:
+        query = input("Enter the query ---> ").lower()
+
     try:
         analysis = toolLib.Analyse(query)
         analysis.classify()
@@ -121,11 +119,7 @@ def take_command():
 
 if __name__ == "__main__":
     # wish()
-    # query = take_command()
-    features.keep_asking()
-    # query = input("Enter the query ---> ").lower()
+    take_command(method="console")
+    features.keep_asking(method="console")
 
-    # analysis = toolLib.Analyse(query)
-    # analysis.classify()
-    
-    # analyse("play")
+
