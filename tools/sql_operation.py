@@ -42,7 +42,7 @@ class Sqlite3:
             self.databPath = os.path._getfullpathname(databPath)
 
     @property
-    def path(self):
+    def __path__(self):
         return self.databPath
 
     def execute(self, command, databPath="", matrix=True, inlineData=False, strToList=False):
