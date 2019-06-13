@@ -12,5 +12,9 @@
     "python.testing.pyTestArgs": [
         "."
     ],
-    "python.testing.promptToConfigure": false
+    "python.testing.promptToConfigure": false,
+    "python.linting.banditEnabled": false,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pep8Enabled": false,
+    "python.linting.enabled": true
 }

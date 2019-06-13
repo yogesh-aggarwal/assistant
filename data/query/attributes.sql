@@ -5,10 +5,10 @@
 
 
 --=====================================================================================================================================================================================================
----> TABLE: Keywords <---
+---> TABLE: KEYWORDS <---
 /* DESCRIPTION: Table containing the information about the keywords used by the assistant for interacting properly with the user. */
 DROP TABLE IF EXISTS KEYWORDS;
-CREATE TABLE KEYWORDS(TYPE TEXT PRIMARY KEY, KEYWORDS TEXT);
+CREATE TABLE KEYWORDS(type TEXT PRIMARY KEY, keywords TEXT);
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO KEYWORDS VALUES("QUESTION", "(WHAT, WHO, WHERE, HOW, WHOSE, WHOM, WHICH, WHY, WHEN)");
 
@@ -18,10 +18,10 @@ INSERT INTO KEYWORDS VALUES("QUESTION", "(WHAT, WHO, WHERE, HOW, WHOSE, WHOM, WH
 
 
 --=====================================================================================================================================================================================================
----> TABLE: Domain <---
+---> TABLE: DOMAIN <---
 /* DESCRIPTION: Table containing the information about the domains and their usage. */
 DROP TABLE IF EXISTS DOMAIN;
-CREATE TABLE DOMAIN(NAME TEXT UNIQUE, USAGE TEXT, CATEGORY TEXT);
+CREATE TABLE DOMAIN(name TEXT UNIQUE, usage TEXT, category TEXT);
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO DOMAIN VALUES('COMMERCIAL', '.com', 'TLD');
 INSERT INTO DOMAIN VALUES('EDUCATION', '.edu', 'TLD');
@@ -33,18 +33,13 @@ INSERT INTO DOMAIN VALUES('NETWORK', '.net', 'TLD');
 
 
 --====================================================================================================================================================================================================
----> TABLE: User_data
-/* DESCRIPTION: Table that contains information about the user and its preferences. */
-DROP TABLE IF EXISTS USER_DATA;
-CREATE TABLE DOMAIN(NAME TEXT UNIQUE, USAGE TEXT, CATEGORY TEXT);
+---> TABLE: USER_ATTRIBUTES
+/* DESCRIPTION: Table that contains the information about the user preferences and the data.AUTOINCREMENT */
+DROP TABLE IF EXISTS USER_ATTRIBUTES;
+CREATE TABLE USER_ATTRIBUTES(name TEXT, value TEXT);
 -----------------------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO DOMAIN VALUES('COMMERCIAL', '.com', 'TLD');
+
+INSERT INTO USER_ATTRIBUTES VALUES("videoDirectory", "D:\Videos\Music Videos");
+INSERT INTO USER_ATTRIBUTES VALUES("musicDirectory", "D:\Music\All time Music");
 
 ----------------------
-
-
-
-
---====================================================================================================================================================================================================
----> TABLE: 
-/* DESCRIPTION: */

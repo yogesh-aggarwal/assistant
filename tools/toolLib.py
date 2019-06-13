@@ -7,7 +7,7 @@ An integrative library that contains the tools required to work the assistant.
 def path():
     import sys
     import os
-    sys.path.append(os.getcwd())
+    sys.path.insert(0, os.getcwd())
 path()
 
 import os
@@ -320,7 +320,7 @@ class Tools:
     def strTolst(self, query):
         intLst = (1, 2, 3, 4, 5, 6, 7, 8, 0)
 
-        tempLst = query.replace("[", "").replace("]", "").split(", ").copy()
+        tempLst = query.replace("[", "", 1).replace("]", "", 1).replace("(", "", 1).replace(")", "", 1).split(", ").copy()
 
         query = []
         for element in tempLst:
@@ -372,7 +372,7 @@ class Analyse:
             quit()
         
         elif "test" in query:
-            Search().classify(query=query.replace("test ", ""))
+            print(Question().checkQuestion(query=query.replace("test ", "")))
 
         elif query.split(" ")[0].upper() in tuple(Sqlite3(databPath=r"data\database\attributes.db").execute("SELECT * FROM KEYWORDS;")[0][1].replace("(", "", 1).replace(")", "", 1).split(", ")):
             Search().searchEngine(query=query)
@@ -483,7 +483,7 @@ class Analyse:
             # Get the greet keywords from the sql database.
             # print("Playing")
             assistant.speak(random.choice(greetKeywords[0]))
-            video_folder = "D:/Videos/Music Videos"
+            video_folder = Sqlite3(databPath=r"data\database\attributes.db").execute("SELECT value FROM USER_ATTRIBUTES WHERE name='videoDirectory'", matrix=False, inlineData=True)[0]
 
             if not video_folder:
                 # Link to different video services. Get the preferred service from the user database if available.
@@ -497,7 +497,7 @@ class Analyse:
             if Tools().reOperation(query, ["music", "song"], "at start"):
                 assistant.speak(random.choice(greetKeywords[0]))
 
-                music_folder = "D:/Music/All time Music"
+                music_folder = Sqlite3(databPath=r"data\database\attributes.db").execute("SELECT value FROM USER_ATTRIBUTES WHERE name='musicDirectory'", matrix=False, inlineData=True)[0]
 
                 if not music_folder:
                     print("No folder available for playing song.")
@@ -530,18 +530,19 @@ class Question:
         Checks whether the provided query is a question or not.
         """
         __temp = False
-        keywords = tuple(Sqlite3(databPath=r"data\database\attributes.db").execute(
-            "SELECT * FROM KEYWORDS;")[0][1].replace("(", "", 1).replace(")", "", 1).split(", "))
-        for word in keywords:
-            word = word.lower()
-            if Tools().reOperation(query, word, "at start"):
+        qWords = Sqlite3(databPath=r"data\database\attributes.db").execute("SELECT keywords FROM KEYWORDS WHERE type='QUESTION'", matrix=False, inlineData=True, strToList=True)
+
+        print(qWords)
+
+        for word in qWords:
+            if Tools().reOperation(query.upper(), word, "at start"):
                 __temp = True
                 self.quesType = word
                 break
+        
+        self.quesType = self.quesType.lower()
 
-        if __temp:
-            del __temp
-            return True
-        else:
-            del __temp
-            return False
+        return __temp
+
+    def analyse(self, query=""):
+        chatBot.AnalyseQuestion(self.quesType, query=query)

@@ -4,11 +4,19 @@ An integrative library that contains tools for performing various tasks related 
     * Inbuilt feature of Jarvis AI Poject.
 """
 
+def path():
+    import sys
+    import os
+    sys.path.insert(0, os.getcwd())
+path()
+
 import os
 import shutil
 import sqlite3
 
 import numpy as np
+
+from . import toolLib
 
 # def copyDatabase(self, newPath="", database=""):
 #     if newPath:
@@ -26,7 +34,6 @@ import numpy as np
 #     except Exception as e:
 #         return f"SQL ERROR ---> {e}"
 
-
 class Sqlite3:
     def __init__(self, databPath=""):
         if not databPath:
@@ -38,7 +45,7 @@ class Sqlite3:
     def path(self):
         return self.databPath
 
-    def execute(self, command, databPath="", matrix=True, inlineData=False):
+    def execute(self, command, databPath="", matrix=True, inlineData=False, strToList=False):
         if not databPath:
             databPath = self.databPath
         else:
@@ -71,6 +78,11 @@ class Sqlite3:
                         __temp.append(data[i][0])
                     data = __temp.copy()
                     del __temp
+                    
+                    if strToList:
+                        if len(data) == 1:
+                            if data[0][0] == "(" or data[0][0] == "[":
+                                data = toolLib.Tools().strTolst(data[0])
                     return data
                 else:
                     return data

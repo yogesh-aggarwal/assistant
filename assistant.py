@@ -11,21 +11,15 @@ Jarvis AI project.
 """
 
 import datetime
-import os
-import random
-import re
-import sys
-import webbrowser
 
-import numpy as np
 import pyttsx3
-import requests
 import speech_recognition as sr
-import wikipedia
-from gtts import gTTS
-from playsound import playsound
 
 from tools import toolLib
+
+# from gtts import gTTS
+# from playsound import playsound
+
 
 engine = pyttsx3.init("sapi5")
 voices = engine.getProperty("voices")
@@ -131,8 +125,9 @@ def take_command(method="voice"):
 if __name__ == "__main__":
     speak("I am Jarvis! How can I help you?")
     # wish()
-    # take_command(method="console")
+
+    take_command(method="console")
     # features.keep_asking(method="console")
 
-    take_command()
+    # take_command()
     # features.keep_asking()

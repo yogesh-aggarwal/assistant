@@ -7,7 +7,7 @@ An integrative library which contains games that are operated by the user throug
 def path():
     import sys
     import os
-    sys.path.append(os.getcwd())
+    sys.path.insert(0, os.getcwd())
 path()
 
 import os
