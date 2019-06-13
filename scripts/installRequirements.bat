@@ -4,6 +4,12 @@ pip install pywin32
 pip install numpy
 pip install pandas
 pip install gtts
+pip install sklearn
+
+rem pip install share
+
+pip install lxml
+pip install pyaudio
 pip install pyttsx3
 pip install requests
 pip install SpeechRecognition
