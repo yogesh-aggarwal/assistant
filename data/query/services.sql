@@ -36,7 +36,7 @@ INSERT INTO VIDEO_SERVICES VALUES("Dailymotion", "https://dailymotion.com", "/se
 ---> TABLE: Engines
 /* DESCRIPTION: Table containing the information about the search engines and their search methods. */
 DROP TABLE IF EXISTS ENGINES;
-CREATE TABLE ENGINES(NAME TEXT PRIMARY KEY, METHOD TEXT);
+CREATE TABLE ENGINES(name TEXT PRIMARY KEY, method TEXT);
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO ENGINES VALUES('Google', '/search?q=');
 INSERT INTO ENGINES VALUES('Bing', '/search?q=');
@@ -57,3 +57,4 @@ INSERT INTO ENGINES VALUES('Creative common', '/search?q=');
 --====================================================================================================================================================================================================
 ---> TABLE: 
 /* DESCRIPTION: */
+

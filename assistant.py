@@ -12,27 +12,15 @@ Jarvis AI project.
 
 import datetime
 
-import pyttsx3
 import speech_recognition as sr
-
 from tools import toolLib
-
-# from gtts import gTTS
-# from playsound import playsound
-
-
-engine = pyttsx3.init("sapi5")
-voices = engine.getProperty("voices")
-engine.setProperty("voice", voices[1].id)
+from win32com.client import Dispatch
 
 
 class Features:
     """
     Class containing the features of the assistant. Can be used for accessing different features using its instants.
     """
-
-    def __init__(self):
-        pass
 
     def exit_assist(self):
         """
@@ -48,12 +36,6 @@ class Features:
         while True:
             take_command(method=method)
 
-    def play_video(self, file_name):
-        pass
-
-    def terminal_command(self, command):
-        pass
-
     def current_time(self):
         pass
 
@@ -65,12 +47,9 @@ def speak(audio):
     """
     Speaks the string provided.
     """
-    # tts = gTTS(text=audio, lang='en')
-    # tts.save("assistant.mp3")
-    # playsound("assistant.mp3")
-
-    engine.say(audio)
-    engine.runAndWait()
+    speak = Dispatch("SAPI.SpVoice")
+    speak.Speak(audio)
+    
 
 
 def wish():
@@ -123,11 +102,11 @@ def take_command(method="voice"):
 
 
 if __name__ == "__main__":
-    speak("I am Jarvis! How can I help you?")
-    # wish()
+    # speak("I am Jarvis! How can I help you?")
+    wish()
 
     take_command(method="console")
-    # features.keep_asking(method="console")
+    features.keep_asking(method="console")
 
     # take_command()
     # features.keep_asking()

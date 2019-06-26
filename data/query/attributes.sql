@@ -17,21 +17,6 @@ INSERT INTO KEYWORDS VALUES("QUESTION", "(WHAT, WHO, WHERE, HOW, WHOSE, WHOM, WH
 
 
 
---=====================================================================================================================================================================================================
----> TABLE: DOMAIN <---
-/* DESCRIPTION: Table containing the information about the domains and their usage. */
-DROP TABLE IF EXISTS DOMAIN;
-CREATE TABLE DOMAIN(name TEXT UNIQUE, usage TEXT, category TEXT);
------------------------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO DOMAIN VALUES('COMMERCIAL', '.com', 'TLD');
-INSERT INTO DOMAIN VALUES('EDUCATION', '.edu', 'TLD');
-INSERT INTO DOMAIN VALUES('NETWORK', '.net', 'TLD');
-
-----------------------
-
-
-
-
 --====================================================================================================================================================================================================
 ---> TABLE: USER_ATTRIBUTES
 /* DESCRIPTION: Table that contains the information about the user preferences and the data.AUTOINCREMENT */
