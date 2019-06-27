@@ -10,7 +10,7 @@
 DROP TABLE IF EXISTS MUSIC_SERVICES;
 CREATE TABLE MUSIC_SERVICES(name TEXT, host TEXT, searchMethod TEXT, playMethod TEXT, rank INT PRIMARY KEY, scrapMethod TEXT, status TEXT);
 -----------------------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO MUSIC_SERVICES VALUES("Ganna", "https://ganna.com", "/search/", "/song/", 1, "bs4", "BUG");
+INSERT INTO MUSIC_SERVICES VALUES("Ganna", "https://ganna.com", "/search/", "/song/", 1, "bs4", "RUN");
 INSERT INTO MUSIC_SERVICES VALUES("Spotify", "https://spotify.com", " ", " ", 2, " ", "BUG");
 
 ----------------------
