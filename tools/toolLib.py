@@ -400,7 +400,7 @@ class Analyse:
         """
         Classifies the query containing "open" keyword.
         """
-        if True:
+        try:
             query = query.lower().capitalize()
             try:
                 location = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT location FROM PROGRAMS_DATA WHERE name="{query}"', matrix=False)[0][0][0]
@@ -441,54 +441,51 @@ class Analyse:
                             # raise ValueError
             except Exception as e:
                 if str(e) != "index 0 is out of bounds for axis 0 with size 0":
-                    assistant.speak("Application doesn't exists")
-                    print(f"EXCEPTION ---> {e}")
-                pass
-            # First check for the programs available on the machine.
-            pass
+                    raise FileNotFoundError("Application doesn't exists")
 
-        elif Tools().reOperation(query, "webpage", "at start"):
-            if Web(query).checkWebExists() == "No internet connection":
-                assistant.speak("No internet connection")
-            if Web(query).checkWebExists():
-                print("Open webpage")
+        except Exception:
+            if Tools().reOperation(query, "webpage", "at start"):
+                if Web(query).checkWebExists() == "No internet connection":
+                    assistant.speak("No internet connection")
+                if Web(query).checkWebExists():
+                    print("Open webpage")
+                else:
+                    print("Webpage does not exists")
+
+            elif Tools().reOperation(query, "my", "at start"):
+                query = query.replace("my", "", 1)
+                if "folder" in query:
+                    query = query.replace("folder", "").replace(" ", "", 1)
+                    # Add the user path to the folder name.
+                    os.startfile(f"{os.path.expanduser('~')}\\{query}")
+
+                elif "favourate" in query:
+                    query.replace("favourate", "")
+                    if "video" in query:
+                        # Get the file from the sql database.
+                        file = r"test\files\video\vid_1.mp4"
+                        os.startfile(file)
+                    elif "music" or "song" in query:
+                        # Get the file from the sql database.
+                        file = r"test\files\music\mus_1.mp3"
+                        os.startfile(file)
+                    elif "image" or "photo" in query:
+                        # Get the file from the sql database.
+                        file = r"test\files\image\img_1.jpg"
+                        os.startfile(file)
+
             else:
-                print("Webpage does not exists")
-
-        elif Tools().reOperation(query, "my", "at start"):
-            query = query.replace("my", "", 1)
-            if "folder" in query:
-                query = query.replace("folder", "").replace(" ", "", 1)
-                # Add the user path to the folder name.
-                os.startfile(f"{os.path.expanduser('~')}\\{query}")
-
-            elif "favourate" in query:
-                query.replace("favourate", "")
-                if "video" in query:
-                    # Get the file from the sql database.
-                    file = r"test\files\video\vid_1.mp4"
-                    os.startfile(file)
-                elif "music" or "song" in query:
-                    # Get the file from the sql database.
-                    file = r"test\files\music\mus_1.mp3"
-                    os.startfile(file)
-                elif "image" or "photo" in query:
-                    # Get the file from the sql database.
-                    file = r"test\files\image\img_1.jpg"
-                    os.startfile(file)
-
-        else:
-            query = (
-                query.replace("go to", "", 1)
-                .replace("https://", "", 1)
-                .replace("http://", "", 1)
-                .replace(" ", "")
-            )
-            domain = Web().findDomain(query)
-            if domain != "Webpage doesn't exists.":
-                webbrowser.open_new_tab("https://" + query + domain)
-            else:
-                print(domain)
+                query = (
+                    query.replace("go to", "", 1)
+                    .replace("https://", "", 1)
+                    .replace("http://", "", 1)
+                    .replace(" ", "")
+                )
+                domain = Web().findDomain(query)
+                if domain != "Webpage doesn't exists.":
+                    webbrowser.open_new_tab("https://" + query + domain)
+                else:
+                    print(domain)
 
     @staticmethod
     def playClassify(query):
