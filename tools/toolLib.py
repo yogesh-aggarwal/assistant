@@ -77,40 +77,36 @@ class Web:
         exist = False
         if not query:
             query = self.query.replace("webpage ", "")
+        
+        for domain in webDomains:
+            domain = domain[0]
+            if domain not in query:
+                self.__domain_presence = False
+            else:
+                self.__domain_presence = True
+                break
 
-        if self.checkConnection():
-            for domain in webDomains:
-                domain = domain[0]
-                if domain not in query:
-                    self.__domain_presence = False
-                else:
-                    self.__domain_presence = True
-                    break
-
-            for domain in webDomains:
-                domain = domain[0]
-                if not self.__domain_presence:
-                    try:
-                        if self.checkConnection(query + domain):
-                            query += domain
-                            self.__domain_presence = True
-                            exist = True
-                            break
-                        else:
-                            self.__domain_presence = False
-                    except Exception:
-                        pass
-                else:
-                    if self.checkConnection(query):
+        for domain in webDomains:
+            domain = domain[0]
+            if not self.__domain_presence:
+                try:
+                    if self.checkConnection(query + domain):
+                        query += domain
+                        self.__domain_presence = True
                         exist = True
                         break
-            if exist:
-                return True
+                    else:
+                        self.__domain_presence = False
+                except Exception:
+                    pass
             else:
-                return False
+                if self.checkConnection(query):
+                    exist = True
+                    break
+        if exist:
+            return True
         else:
-            return "No internet connection"
-            # print("No internet connection")
+            return False
 
     def findDomain(self, query=""):
         """
@@ -134,9 +130,9 @@ class Web:
                 if Web().checkWebExists(query=query + domain) == True:
                     return domain
                 elif Web().checkWebExists(query=query + domain) == False:
-                    return "Webpage doesn't exists."
+                    return False
                 else:
-                    return "No internet connection"
+                    return False
         else:
             return ""
 
@@ -455,18 +451,16 @@ class Analyse:
                                 break
                         else:
                             if shortNameCount == 6:
-                                assistant.speak("Application doesn't exits")
-                            # raise ValueError
+                                raise FileNotFoundError("Application doesn't exists")
             except Exception as e:
                 if str(e) != "index 0 is out of bounds for axis 0 with size 0":
                     raise FileNotFoundError("Application doesn't exists")
 
         except Exception:
             if Tools().reOperation(query, "webpage", "at start"):
-                if Web(query).checkWebExists() == "No internet connection":
-                    assistant.speak("No internet connection")
-                if Web(query).checkWebExists():
-                    print("Open webpage")
+                if Web(query).checkConnection():
+                    if Web(query).checkWebExists():
+                        print("Open webpage")
                 else:
                     print("Webpage does not exists")
 
@@ -500,10 +494,10 @@ class Analyse:
                     .replace(" ", "")
                 )
                 domain = Web().findDomain(query)
-                if domain != "Webpage doesn't exists.":
+                if domain:
                     webbrowser.open_new_tab("https://" + query + domain)
                 else:
-                    print(domain)
+                    assistant.speak("You don't have internet connection")
 
     @staticmethod
     def playClassify(query):
