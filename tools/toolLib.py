@@ -12,13 +12,15 @@ import webbrowser
 import bs4
 import numpy as np
 import requests
-
-import assistant
-import features.assist_games as games
-import features.chatBot as chatBot
-import features.faceRecognition as fr
 from sql_tools import Sqlite3
 
+import assistant
+# import features.assist_games as games
+# import features.chatBot as chatBot
+# import features.faceRecognition as fr
+from tools.apiPlay import apiMusic, apiVideo
+
+assistant.speak("Pota Boy")
 webDomains = [".com", ".org", ".in", ".edu", ".net", ".arpa"]
 # webDomains = Sqlite3(databPath=r"data\database\services.db").execute("SELECT USAGE FROM DOMAIN")
 greetKeywords = np.array([["Sure!", "Okay!", "Here it is", "Here is what you have demanded"]])
@@ -552,8 +554,26 @@ class Analyse:
             pass
 
         else:
-            Web().playOnline(query)
-            assistant.speak(random.choice(greetKeywords[0]))
+            musicServices = Sqlite3(databPath=r"data\database\services.db").execute(f"SELECT name FROM MUSIC_SERVICES", splitByColumns=True)[0][0]
+            videoServices = Sqlite3(databPath=r"data\database\services.db").execute(f"SELECT name FROM VIDEO_SERVICES", splitByColumns=True)[0][0]
+            wordList = query.split(" ")
+            __temp = wordList.copy()
+            __temp.pop(-1)
+            service = None
+
+            query = " ".join(__temp)
+            for i in [" on", " in", " at", " with"]:
+                if Tools().reOperation(" ".join(__temp), i, "at end"):
+                    service = wordList[-1]
+                    query = query.replace(i, "", -1)
+                    break
+
+            if service == "gaana":
+                apiMusic.gaana(query)
+
+            else:
+                Web().playOnline(query, objType="music", service=Sqlite3(databPath=r"data\database\services.db").execute(f"SELECT name FROM MUSIC_SERVICES WHERE rank=1")[0][0][0])
+                assistant.speak(random.choice(greetKeywords[0]))
 
 
 class Question:
