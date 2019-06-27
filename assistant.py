@@ -38,7 +38,6 @@ def speak(audio):
     """
     speak = Dispatch("SAPI.SpVoice")
     speak.Speak(audio)
-    
 
 
 def wish():
@@ -52,8 +51,8 @@ def wish():
         speak("Good Afternoon!")
     else:
         speak("Good Evening!")
-    speak("I am Jarvis! Chip number 227O4CB, Memory one Terabytes. How can I help you?")
-    # speak("I am Jarvis! How can I help you?")
+    # speak("I am Jarvis! Chip number 227O4CB, Memory one Terabytes. How can I help you?")
+    speak("I am Jarvis! How can I help you?")
 
 
 def take_command(method="voice"):
@@ -95,7 +94,7 @@ if __name__ == "__main__":
     # wish()
 
     take_command(method="console")
-    keep_asking(method="console")
+    # keep_asking(method="console")
 
     # take_command()
     # keep_asking()
