@@ -20,7 +20,6 @@ import assistant
 # import features.faceRecognition as fr
 from tools.apiPlay import apiMusic, apiVideo
 
-assistant.speak("Pota Boy")
 webDomains = [".com", ".org", ".in", ".edu", ".net", ".arpa"]
 # webDomains = Sqlite3(databPath=r"data\database\services.db").execute("SELECT USAGE FROM DOMAIN")
 greetKeywords = np.array([["Sure!", "Okay!", "Here it is", "Here is what you have demanded"]])
