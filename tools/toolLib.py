@@ -409,13 +409,20 @@ class Analyse:
             try:
                 if location != "":
                     applicationName = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT fileName FROM PROGRAMS_DATA WHERE name="{query}"')[0][0][0]
-                    method = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT locationMethod FROM PROGRAMS_DATA WHERE name="{query}"')[0][0][0]
-                    if method == "user":
-                        os.startfile(f"{Tools().getUserPath}\\{location}\\{applicationName}")
-                        assistant.speak(random.choice(greetKeywords[0]))
+                    locationMethod = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT locationMethod FROM PROGRAMS_DATA WHERE name="{query}"')[0][0][0]
+                    openMethod = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT openMethod FROM PROGRAMS_DATA WHERE name="{query}"')[0][0][0]
+                    if locationMethod == "user":
+                        if openMethod == "exe":
+                            os.startfile(f"{Tools().getUserPath}\\{location}\\{applicationName}")
+                            assistant.speak(random.choice(greetKeywords[0]))
+                        else:
+                            os.system(applicationName)
                     else:
-                        os.startfile(f"{location}\\{applicationName}")
-                        assistant.speak(random.choice(greetKeywords[0]))
+                        if openMethod == "exe":
+                            os.startfile(f"{location}\\{applicationName}")
+                            assistant.speak(random.choice(greetKeywords[0]))
+                        else:
+                            os.system(applicationName)
                 else:
                     for shortNameCount in range(1, 7):
                         try:
@@ -425,15 +432,26 @@ class Analyse:
 
                         if location != "":
                             applicationName = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT fileName FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0][0]
-                            method = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT locationMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0][0]
+                            locationMethod = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT locationMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0][0]
+                            openMethod = Sqlite3(databPath=r"data\database\programInstallData.db").execute(f'SELECT openMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0][0]
 
-                            if method == "user":
-                                os.startfile(f"{Tools().getUserPath}\\{location}\\{applicationName}")
-                                assistant.speak(random.choice(greetKeywords[0]))
+                            if locationMethod == "user":
+                                if openMethod == "exe":
+                                    os.startfile(f"{Tools().getUserPath}\\{location}\\{applicationName}")
+                                    assistant.speak(random.choice(greetKeywords[0]))
+                                    break
+                                else:
+                                    os.system(applicationName)
+                                    break
                                 break
                             else:
-                                os.startfile(f"{location}\\{applicationName}")
-                                assistant.speak(random.choice(greetKeywords[0]))
+                                if openMethod == "exe":
+                                    os.startfile(f"{location}\\{applicationName}")
+                                    assistant.speak(random.choice(greetKeywords[0]))
+                                    break
+                                else:
+                                    os.system(applicationName)
+                                    break
                                 break
                         else:
                             if shortNameCount == 6:
@@ -569,4 +587,3 @@ class Question:
 
     def analyse(self, query=""):
         chatBot.AnalyseQuestion(self.quesType, query=query)
-
