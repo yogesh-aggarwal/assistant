@@ -2,7 +2,7 @@
 Jarvis AI project.
     * Automates the tasks command by the user through speech.
     * Uses connectivity to work properly.
-    
+
     Features-
         1) Send E-Mails.
         2) Plays music.
@@ -17,30 +17,19 @@ from tools import toolLib
 from win32com.client import Dispatch
 
 
-class Features:
+def exit_assist():
     """
-    Class containing the features of the assistant. Can be used for accessing different features using its instants.
+    This function helps in quitting the program even if it is the "keep asking" state or not.
     """
+    speak("Bye! See you again.")
+    quit()
 
-    def exit_assist(self):
-        """
-        This function helps in quitting the program even if it is the "keep asking" state or not.
-        """
-        speak("Bye! See you again.")
-        quit()
-
-    def keep_asking(self, method="voice"):
-        """
-        This function makes the assistant keep asking the user commands i.e. not terminates after the given task is compeleted.
-        """
-        while True:
-            take_command(method=method)
-
-    def current_time(self):
-        pass
-
-
-features = Features()
+def keep_asking(method="voice"):
+    """
+    This function makes the assistant keep asking the user commands i.e. not terminates after the given task is compeleted.
+    """
+    while True:
+        take_command(method=method)
 
 
 def speak(audio):
@@ -103,10 +92,10 @@ def take_command(method="voice"):
 
 if __name__ == "__main__":
     # speak("I am Jarvis! How can I help you?")
-    wish()
+    # wish()
 
     take_command(method="console")
-    features.keep_asking(method="console")
+    keep_asking(method="console")
 
     # take_command()
-    # features.keep_asking()
+    # keep_asking()
