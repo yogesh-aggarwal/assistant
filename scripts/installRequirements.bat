@@ -15,6 +15,6 @@ pip install requests
 pip install SpeechRecognition
 pip install wikipedia
 pip install pathlib
-pip install sql-tools
+pip install sql-tools==0.1.4
 pip install playsound
 pip install opencv-python
