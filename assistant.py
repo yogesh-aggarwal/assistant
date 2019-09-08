@@ -15,6 +15,7 @@ import datetime
 import speech_recognition as sr
 # from win32com.client import Dispatch
 
+import platform
 from tools import toolLib
 from sql_tools import sqlite
 
@@ -88,7 +89,7 @@ def take_command(method="voice"):
         query = input("Enter the query ---> ").lower()
 
     try:
-        analysis = toolLib.Analyse(query)
+        analysis = toolLib.Analyse(query, platform=platform.system())
         analysis.classify()
         solved = input("Solved: ")
         if not solved:

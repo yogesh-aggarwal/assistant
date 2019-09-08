@@ -351,8 +351,9 @@ class Analyse:
     Class that contains analysis tools for the query provided.
     """
 
-    def __init__(self, query):
+    def __init__(self, query, platform):
         self.query = query
+        self.platform = platform.lower()
 
     def classify(self, webDomains=webDomains):
         """
@@ -394,7 +395,26 @@ class Analyse:
 
         elif query.split(" ")[0].upper() in sqlite.execute(databPath=r"data/database/attributes.db", command="SELECT * FROM KEYWORDS;", matrix=False)[0][0][1].replace("(", "", 1).replace(")", "", 1).split(", "):
             # SCRAP GOOGLE TO GET RESULTS
-            Search().searchEngine(query=query)  # REMOVE FOR SCRAPPING
+
+            engine = "google"
+            searchMethod = Tools().getSearchMethod(engine)
+            link = "https://gaana.com/search/saaho"
+            link = f"https://{engine}.com{searchMethod}{query}"
+
+            headers = {
+                'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+            }
+
+            res = requests.get(link, headers=headers).text
+            soup = bs4.BeautifulSoup(res, "lxml")
+
+            try:
+                ans = soup.select(".Z0LcW")[0]
+            except Exception:
+                assistant.speak("No results found")
+                exit()
+
+            assistant.speak(f"{query} is {ans}")
 
         else:
             assistant.speak("I am not able to understand your query at the moment. Please try after future updates.")
@@ -606,6 +626,7 @@ class Question:
                 break
 
         self.quesType = self.quesType.lower()
+        print(self.quesType)
 
         return __temp
 
