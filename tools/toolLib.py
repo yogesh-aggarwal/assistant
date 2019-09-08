@@ -491,6 +491,11 @@ class Analyse:
             except Exception:
                 syn.speak("No internet connection")
 
+        # Game
+        elif "game" in query:
+            import games
+            games.init()
+
         # Exiting
         elif query == "exit":
             syn.speak("See you again.")
@@ -694,10 +699,6 @@ class Analyse:
                 Web().playOnline(query)
                 syn.speak(random.choice(greetKeywords[0]))
 
-        elif "game" in query:
-            # import game module and use the different classes for different games.
-            # games.Games.choice()
-            pass
 
         else:
             musicServices = sqlite.execute(
@@ -710,6 +711,7 @@ class Analyse:
                 command=f"SELECT name FROM VIDEO_SERVICES",
                 splitByColumns=True,
             )[0][0]
+
             wordList = query.split(" ")
             __temp = wordList.copy()
             __temp.pop(-1)
@@ -736,7 +738,7 @@ class Analyse:
                 )
                 syn.speak(random.choice(greetKeywords[0]))
 
-
+    
 class Question:
     def __init__(self):
         self.quesType = ""

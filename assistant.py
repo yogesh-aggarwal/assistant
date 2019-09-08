@@ -75,7 +75,7 @@ def main(method="voice", welcome=False, keep_asking=False):
                     )[0]
                 )
                 raise e
-            
+
             terminate()
             if not keep_asking:
                 break
