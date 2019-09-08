@@ -140,11 +140,11 @@ class Web:
     def playOnline(self, query, objType="video", service="YouTube", rand=False):
         if Web.checkConnection():
             import webbrowser
-            webbrowser.open_new_tab(Search().VideoSearch(query, service="YouTube", rand=rand))
+            webbrowser.open_new_tab(Search().videoSearch(query, service="YouTube", rand=rand))
         else:
             # REMOVE IT IN FUTURE
             import webbrowser
-            webbrowser.open_new_tab(Search().VideoSearch(query, service="YouTube", rand=rand))
+            webbrowser.open_new_tab(Search().videoSearch(query, service="YouTube", rand=rand))
             # assistant.speak("You don't have internet connection!")
 
 
@@ -227,7 +227,7 @@ class Search:
         method = Tools().getSearchMethod(engine)
         webbrowser.open_new_tab(f"https://{engine}.com{method}{query}")
 
-    def VideoSearch(self, query="", service="", rand=False):
+    def videoSearch(self, query="", service="", rand=False):
         """
         Returns the url of the video of the trending(according to the database [services.db]) video engine. By default it opens the first video.
         """

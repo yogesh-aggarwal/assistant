@@ -16,9 +16,14 @@ import speech_recognition as sr
 # from win32com.client import Dispatch
 
 import platform
+import pyttsx3
 from tools import toolLib
 from sql_tools import sqlite
 
+
+engine = pyttsx3.init("nsss")
+voices = engine.setProperty("voices")
+print(voices)
 
 def exit_assist():
     """
