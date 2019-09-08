@@ -384,7 +384,8 @@ class Tools:
 
         return str(Path.home())
 
-    def strTolst(self, query):
+    @staticmethod
+    def strTolst(query):
         intLst = (1, 2, 3, 4, 5, 6, 7, 8, 0)
 
         tempLst = (
@@ -424,16 +425,20 @@ class Analyse:
         """
         query = self.query
 
+        # Open program
         if Tools().reOperation(query, "open", "at start"):
             self.openClassify(query.replace("open ", "", 1))
 
+        # Play content
         elif Tools().reOperation(query, "play", "at start"):
             self.playClassify(query.replace("play ", ""))
 
+        # Search content
         elif Tools().reOperation(query, "search", "at start"):
             var = Search()
             var.classify(query)
 
+        # Open web
         elif Tools().reOperation(query, "go to", "at start"):
             query = (
                 query.replace("go to", "", 1)
@@ -449,18 +454,14 @@ class Analyse:
                 # print("Error")
                 syn.speak("No internet connection")
 
-        elif query == "exit":
-            syn.speak("See you again.")
-            quit(1)
-
-        elif "test" in query:
-            print(Question().checkQuestion(query=query.replace("test ", "")))
-
-        elif query.split(" ")[0].upper() in sqlite.execute(
-            databPath=r"data/database/attributes.db",
-            command="SELECT * FROM KEYWORDS;",
-            matrix=False,
-        )[0][0][1].replace("(", "", 1).replace(")", "", 1).split(", "):
+        # Other search for questions on Google
+        elif query.split(" ")[0].upper() in Tools.strTolst(
+            sqlite.execute(
+                databPath=r"data/database/attributes.db",
+                command="SELECT * FROM KEYWORDS;",
+                matrix=False,
+            )[0][0][1]
+        ):
             # SCRAP GOOGLE TO GET RESULTS
 
             engine = "google"
@@ -471,18 +472,30 @@ class Analyse:
             headers = {
                 "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
             }
-
-            res = requests.get(link, headers=headers).text
-            soup = bs4.BeautifulSoup(res, "lxml")
-
             try:
-                ans = soup.select(".Z0LcW")[0]
+                res = requests.get(link, headers=headers).text
+                soup = bs4.BeautifulSoup(res, "lxml")
+
+                try:
+                    ans = soup.select(".Z0LcW")[0]
+                except Exception:
+                    syn.speak("No results found")
+                    exit()
+
+                syn.speak(f"{query} is {ans}")
             except Exception:
-                syn.speak("No results found")
-                exit()
+                syn.speak("No internet connection")
 
-            syn.speak(f"{query} is {ans}")
+        # Exiting
+        elif query == "exit":
+            syn.speak("See you again.")
+            quit(1)
 
+        # Testing query
+        elif "test" in query:
+            print(Question().checkQuestion(query=query.replace("test ", "")))
+
+        # Not understood
         else:
             syn.speak(
                 "I am not able to understand your query at the moment. Please try after future updates."

@@ -15,6 +15,7 @@ import platform
 from tools import synthesis as syn
 
 from sql_tools import sqlite
+from tools_lib import bprint, cprint
 from tools.toolLib import Analyse
 
 
@@ -76,8 +77,9 @@ def main(method="voice", welcome=False, keep_asking=False):
 
             if not keep_asking:
                 break
-    except Exception:
-        syn.speak("\nBye! See you again")
+    except Exception as e:
+        bprint(e)
+        # syn.speak("\nBye! See you again")
 
 
 if __name__ == "__main__":
