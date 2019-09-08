@@ -13,8 +13,8 @@ import bs4
 import numpy as np
 import requests
 from sql_tools import sqlite
+from . import synthesis as syn
 
-import assistant
 # import features.assist_games as games
 # import features.chatBot as chatBot
 # import features.faceRecognition as fr
@@ -22,7 +22,9 @@ from tools.apiPlay import apiMusic, apiVideo
 
 webDomains = [".com", ".org", ".in", ".edu", ".net", ".arpa"]
 # webDomains = sqlite.execute(databPath=r"data/database/services.db", command="SELECT USAGE FROM DOMAIN")
-greetKeywords = np.array([["Sure!", "Okay!", "Here it is", "Here is what you have demanded"]])
+greetKeywords = np.array(
+    [["Sure!", "Okay!", "Here it is", "Here is what you have demanded"]]
+)
 
 
 class Web:
@@ -78,7 +80,7 @@ class Web:
         exist = False
         if not query:
             query = self.query.replace("webpage ", "")
-        
+
         for domain in webDomains:
             domain = domain[0]
             if domain not in query:
@@ -140,12 +142,18 @@ class Web:
     def playOnline(self, query, objType="video", service="YouTube", rand=False):
         if Web.checkConnection():
             import webbrowser
-            webbrowser.open_new_tab(Search().videoSearch(query, service="YouTube", rand=rand))
+
+            webbrowser.open_new_tab(
+                Search().videoSearch(query, service="YouTube", rand=rand)
+            )
         else:
             # REMOVE IT IN FUTURE
             import webbrowser
-            webbrowser.open_new_tab(Search().videoSearch(query, service="YouTube", rand=rand))
-            # assistant.speak("You don't have internet connection!")
+
+            webbrowser.open_new_tab(
+                Search().videoSearch(query, service="YouTube", rand=rand)
+            )
+            # syn.speak("You don't have internet connection!")
 
 
 class Search:
@@ -160,7 +168,13 @@ class Search:
         """
         Classfies the type of search query provided.
         """
-        engines = sqlite.execute("SELECT name FROM ENGINES", databPath=r"data/database/services.db", matrix=False, inlineData=True, splitByColumns=True)[0][0]
+        engines = sqlite.execute(
+            "SELECT name FROM ENGINES",
+            databPath=r"data/database/services.db",
+            matrix=False,
+            inlineData=True,
+            splitByColumns=True,
+        )[0][0]
 
         query = query.lower().replace("search", "", 1).strip()
         wordList = query.split(" ")
@@ -174,26 +188,44 @@ class Search:
                 pass
 
         for __engine in engines:
-            if (wordList[0].capitalize() == __engine):  # Check if the search engine is at the start of the query.
+            if (
+                wordList[0].capitalize() == __engine
+            ):  # Check if the search engine is at the start of the query.
                 queryType = "Search"
                 for __engine in engines:
-                    if (wordList[-1].capitalize() == __engine):  # Checking if there is more than one engines present in the query, at start & at end.
-                        if wordList[-2] in ["on","at"]:  # Check if it contains the keywords that signifies that the word is the engine.
+                    if (
+                        wordList[-1].capitalize() == __engine
+                    ):  # Checking if there is more than one engines present in the query, at start & at end.
+                        if wordList[-2] in [
+                            "on",
+                            "at",
+                        ]:  # Check if it contains the keywords that signifies that the word is the engine.
                             engine = wordList[-1].capitalize()
                             break
                         else:
-                            engine = wordList[0].capitalize()  # The search engine is at the start
+                            engine = wordList[
+                                0
+                            ].capitalize()  # The search engine is at the start
                             break
                     else:
-                        engine = wordList[0].capitalize()  # The search engine is at the start
+                        engine = wordList[
+                            0
+                        ].capitalize()  # The search engine is at the start
 
-            elif (wordList[-1].capitalize() == __engine):  # Checking if the searching engine is not at start but at the last.
+            elif (
+                wordList[-1].capitalize() == __engine
+            ):  # Checking if the searching engine is not at start but at the last.
                 for __engine in engines:
-                    if wordList[-2] in ["on", "at"]:  # Check if it contains the keywords that signifies that the word is the engine.
+                    if wordList[-2] in [
+                        "on",
+                        "at",
+                    ]:  # Check if it contains the keywords that signifies that the word is the engine.
                         engine = wordList[-1].capitalize()
                         break
                     else:
-                        engine = wordList[0].capitalize() if engine in engines else "Google"  # The search engine is at the start
+                        engine = (
+                            wordList[0].capitalize() if engine in engines else "Google"
+                        )  # The search engine is at the start
                         if engine in engines:
                             break
                 queryType = "Search"
@@ -232,18 +264,41 @@ class Search:
         Returns the url of the video of the trending(according to the database [services.db]) video engine. By default it opens the first video.
         """
         if not service:
-            host = sqlite.execute(databPath=r"data/database/services.db", command=f"SELECT host FROM VIDEO_SERVICES WHERE rank=1")[0][0][0]
+            host = sqlite.execute(
+                databPath=r"data/database/services.db",
+                command=f"SELECT host FROM VIDEO_SERVICES WHERE rank=1",
+            )[0][0][0]
         else:
-            host = sqlite.execute(databPath=r"data/database/services.db", command=f"SELECT host FROM VIDEO_SERVICES WHERE name='{service}'")[0][0][0]
+            host = sqlite.execute(
+                databPath=r"data/database/services.db",
+                command=f"SELECT host FROM VIDEO_SERVICES WHERE name='{service}'",
+            )[0][0][0]
 
-        searchMethod = sqlite.execute(databPath=r"data/database/services.db", command=f"SELECT searchMethod FROM VIDEO_SERVICES WHERE host='{host}'")[0][0][0]
-        playMethod = sqlite.execute(databPath=r"data/database/services.db", command=f"SELECT playMethod FROM VIDEO_SERVICES WHERE host='{host}'")[0][0][0]
+        searchMethod = sqlite.execute(
+            databPath=r"data/database/services.db",
+            command=f"SELECT searchMethod FROM VIDEO_SERVICES WHERE host='{host}'",
+        )[0][0][0]
+        playMethod = sqlite.execute(
+            databPath=r"data/database/services.db",
+            command=f"SELECT playMethod FROM VIDEO_SERVICES WHERE host='{host}'",
+        )[0][0][0]
 
         if not searchMethod:
-            assistant.speak("The video service doesn't exists. So I am opening it on other service.")
-            host = sqlite.execute(databPath=r"data/database/services.db", command=f"SELECT host FROM VIDEO_SERVICES WHERE rank=1")[0][0][0]
-            searchMethod = sqlite.execute(databPath=r"data/database/services.db", command=f"SELECT searchMethod FROM VIDEO_SERVICES WHERE rank=1")[0][0][0]
-            playMethod = sqlite.execute(databPath=r"data/database/services.db", command=f"SELECT playMethod FROM VIDEO_SERVICES WHERE rank=1")[0][0][0]
+            syn.speak(
+                "The video service doesn't exists. So I am opening it on other service."
+            )
+            host = sqlite.execute(
+                databPath=r"data/database/services.db",
+                command=f"SELECT host FROM VIDEO_SERVICES WHERE rank=1",
+            )[0][0][0]
+            searchMethod = sqlite.execute(
+                databPath=r"data/database/services.db",
+                command=f"SELECT searchMethod FROM VIDEO_SERVICES WHERE rank=1",
+            )[0][0][0]
+            playMethod = sqlite.execute(
+                databPath=r"data/database/services.db",
+                command=f"SELECT playMethod FROM VIDEO_SERVICES WHERE rank=1",
+            )[0][0][0]
 
         link = f"{host}{searchMethod}{query}"
 
@@ -280,9 +335,17 @@ class Tools:
         """
         # Get methods from sql database and map them to dicts.
         try:
-            return sqlite.execute(databPath=r"data/database/services.db", command=f"SELECT METHOD FROM ENGINES WHERE NAME='{engine.capitalize()}'", matrix=False)[0][0][0]
+            return sqlite.execute(
+                databPath=r"data/database/services.db",
+                command=f"SELECT METHOD FROM ENGINES WHERE NAME='{engine.capitalize()}'",
+                matrix=False,
+            )[0][0][0]
         except Exception:
-            return sqlite.execute(databPath=r"data/database/services.db", command=f"SELECT METHOD FROM ENGINES WHERE NAME='Google'", matrix=False)[0][0][0]
+            return sqlite.execute(
+                databPath=r"data/database/services.db",
+                command=f"SELECT METHOD FROM ENGINES WHERE NAME='Google'",
+                matrix=False,
+            )[0][0][0]
 
     def reOperation(self, query, string, method):
         """
@@ -384,16 +447,20 @@ class Analyse:
                     webbrowser.open_new_tab("https://" + query + domain)
             else:
                 # print("Error")
-                assistant.speak("No internet connection")
+                syn.speak("No internet connection")
 
         elif query == "exit":
-            assistant.speak("See you again.")
-            quit()
+            syn.speak("See you again.")
+            quit(1)
 
         elif "test" in query:
             print(Question().checkQuestion(query=query.replace("test ", "")))
 
-        elif query.split(" ")[0].upper() in sqlite.execute(databPath=r"data/database/attributes.db", command="SELECT * FROM KEYWORDS;", matrix=False)[0][0][1].replace("(", "", 1).replace(")", "", 1).split(", "):
+        elif query.split(" ")[0].upper() in sqlite.execute(
+            databPath=r"data/database/attributes.db",
+            command="SELECT * FROM KEYWORDS;",
+            matrix=False,
+        )[0][0][1].replace("(", "", 1).replace(")", "", 1).split(", "):
             # SCRAP GOOGLE TO GET RESULTS
 
             engine = "google"
@@ -402,7 +469,7 @@ class Analyse:
             link = f"https://{engine}.com{searchMethod}{query}"
 
             headers = {
-                'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
             }
 
             res = requests.get(link, headers=headers).text
@@ -411,13 +478,15 @@ class Analyse:
             try:
                 ans = soup.select(".Z0LcW")[0]
             except Exception:
-                assistant.speak("No results found")
+                syn.speak("No results found")
                 exit()
 
-            assistant.speak(f"{query} is {ans}")
+            syn.speak(f"{query} is {ans}")
 
         else:
-            assistant.speak("I am not able to understand your query at the moment. Please try after future updates.")
+            syn.speak(
+                "I am not able to understand your query at the moment. Please try after future updates."
+            )
 
     @staticmethod
     def openClassify(query):
@@ -427,42 +496,71 @@ class Analyse:
         try:
             query = query.lower().capitalize()
             try:
-                location = sqlite.execute(databPath=r"data/database/programInstallData.db", command=f'SELECT location FROM PROGRAMS_DATA WHERE name="{query}"', matrix=False)[0][0][0]
+                location = sqlite.execute(
+                    databPath=r"data/database/programInstallData.db",
+                    command=f'SELECT location FROM PROGRAMS_DATA WHERE name="{query}"',
+                    matrix=False,
+                )[0][0][0]
             except Exception:
                 location = ""
             try:
                 if location != "":
-                    applicationName = sqlite.execute(databPath=r"data/database/programInstallData.db", command=f'SELECT fileName FROM PROGRAMS_DATA WHERE name="{query}"')[0][0][0]
-                    locationMethod = sqlite.execute(databPath=r"data/database/programInstallData.db", command=f'SELECT locationMethod FROM PROGRAMS_DATA WHERE name="{query}"')[0][0][0]
-                    openMethod = sqlite.execute(databPath=r"data/database/programInstallData.db", command=f'SELECT openMethod FROM PROGRAMS_DATA WHERE name="{query}"')[0][0][0]
+                    applicationName = sqlite.execute(
+                        databPath=r"data/database/programInstallData.db",
+                        command=f'SELECT fileName FROM PROGRAMS_DATA WHERE name="{query}"',
+                    )[0][0][0]
+                    locationMethod = sqlite.execute(
+                        databPath=r"data/database/programInstallData.db",
+                        command=f'SELECT locationMethod FROM PROGRAMS_DATA WHERE name="{query}"',
+                    )[0][0][0]
+                    openMethod = sqlite.execute(
+                        databPath=r"data/database/programInstallData.db",
+                        command=f'SELECT openMethod FROM PROGRAMS_DATA WHERE name="{query}"',
+                    )[0][0][0]
                     if locationMethod == "user":
                         if openMethod == "exe":
-                            os.startfile(f"{Tools().getUserPath}\\{location}\\{applicationName}")
-                            assistant.speak(random.choice(greetKeywords[0]))
+                            os.startfile(
+                                f"{Tools().getUserPath}\\{location}\\{applicationName}"
+                            )
+                            syn.speak(random.choice(greetKeywords[0]))
                         else:
                             os.system(applicationName)
                     else:
                         if openMethod == "exe":
                             os.startfile(f"{location}\\{applicationName}")
-                            assistant.speak(random.choice(greetKeywords[0]))
+                            syn.speak(random.choice(greetKeywords[0]))
                         else:
                             os.system(applicationName)
                 else:
                     for shortNameCount in range(1, 7):
                         try:
-                            location = sqlite.execute(databPath=r"data/database/programInstallData.db", command=f'SELECT location FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0][0]
+                            location = sqlite.execute(
+                                databPath=r"data/database/programInstallData.db",
+                                command=f'SELECT location FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
+                            )[0][0][0]
                         except Exception:
                             location = ""
 
                         if location != "":
-                            applicationName = sqlite.execute(databPath=r"data/database/programInstallData.db", command=f'SELECT fileName FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0][0]
-                            locationMethod = sqlite.execute(databPath=r"data/database/programInstallData.db", command=f'SELECT locationMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0][0]
-                            openMethod = sqlite.execute(databPath=r"data/database/programInstallData.db", command=f'SELECT openMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"')[0][0][0]
+                            applicationName = sqlite.execute(
+                                databPath=r"data/database/programInstallData.db",
+                                command=f'SELECT fileName FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
+                            )[0][0][0]
+                            locationMethod = sqlite.execute(
+                                databPath=r"data/database/programInstallData.db",
+                                command=f'SELECT locationMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
+                            )[0][0][0]
+                            openMethod = sqlite.execute(
+                                databPath=r"data/database/programInstallData.db",
+                                command=f'SELECT openMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
+                            )[0][0][0]
 
                             if locationMethod == "user":
                                 if openMethod == "exe":
-                                    os.startfile(f"{Tools().getUserPath}\\{location}\\{applicationName}")
-                                    assistant.speak(random.choice(greetKeywords[0]))
+                                    os.startfile(
+                                        f"{Tools().getUserPath}\\{location}\\{applicationName}"
+                                    )
+                                    syn.speak(random.choice(greetKeywords[0]))
                                     break
                                 else:
                                     os.system(applicationName)
@@ -471,7 +569,7 @@ class Analyse:
                             else:
                                 if openMethod == "exe":
                                     os.startfile(f"{location}\\{applicationName}")
-                                    assistant.speak(random.choice(greetKeywords[0]))
+                                    syn.speak(random.choice(greetKeywords[0]))
                                     break
                                 else:
                                     os.system(applicationName)
@@ -525,7 +623,7 @@ class Analyse:
                 if domain:
                     webbrowser.open_new_tab("https://" + query + domain)
                 else:
-                    assistant.speak("You don't have internet connection")
+                    syn.speak("You don't have internet connection")
 
     @staticmethod
     def playClassify(query):
@@ -535,9 +633,10 @@ class Analyse:
         if "video" in query:
             # Get the greet keywords from the sql database.
             # print("Playing")
-            assistant.speak(random.choice(greetKeywords[0]))
-            video_folder = sqlite.execute(databPath=r"data/database/attributes.db", command=
-                "SELECT value FROM USER_ATTRIBUTES WHERE name='videoDirectory'",
+            syn.speak(random.choice(greetKeywords[0]))
+            video_folder = sqlite.execute(
+                databPath=r"data/database/attributes.db",
+                command="SELECT value FROM USER_ATTRIBUTES WHERE name='videoDirectory'",
                 matrix=False,
                 inlineData=True,
             )[0][0][0]
@@ -552,12 +651,11 @@ class Analyse:
 
         elif "music" in query or "song" in query:
             if Tools().reOperation(query, ["music", "song"], "at start"):
-                assistant.speak(random.choice(greetKeywords[0]))
+                syn.speak(random.choice(greetKeywords[0]))
 
                 music_folder = sqlite.execute(
-                    databPath=r"data/database/attributes.db"
-                , command=
-                    "SELECT value FROM USER_ATTRIBUTES WHERE name='musicDirectory'",
+                    databPath=r"data/database/attributes.db",
+                    command="SELECT value FROM USER_ATTRIBUTES WHERE name='musicDirectory'",
                     matrix=False,
                     inlineData=True,
                 )[0][0][0]
@@ -576,7 +674,7 @@ class Analyse:
 
             else:
                 Web().playOnline(query)
-                assistant.speak(random.choice(greetKeywords[0]))
+                syn.speak(random.choice(greetKeywords[0]))
 
         elif "game" in query:
             # import game module and use the different classes for different games.
@@ -584,8 +682,16 @@ class Analyse:
             pass
 
         else:
-            musicServices = sqlite.execute(databPath=r"data/database/services.db", command=f"SELECT name FROM MUSIC_SERVICES", splitByColumns=True)[0][0]
-            videoServices = sqlite.execute(databPath=r"data/database/services.db", command=f"SELECT name FROM VIDEO_SERVICES", splitByColumns=True)[0][0]
+            musicServices = sqlite.execute(
+                databPath=r"data/database/services.db",
+                command=f"SELECT name FROM MUSIC_SERVICES",
+                splitByColumns=True,
+            )[0][0]
+            videoServices = sqlite.execute(
+                databPath=r"data/database/services.db",
+                command=f"SELECT name FROM VIDEO_SERVICES",
+                splitByColumns=True,
+            )[0][0]
             wordList = query.split(" ")
             __temp = wordList.copy()
             __temp.pop(-1)
@@ -602,8 +708,15 @@ class Analyse:
                 apiMusic.gaana(query)
 
             else:
-                Web().playOnline(query, objType="music", service=sqlite.execute(databPath=r"data/database/services.db", command=f"SELECT name FROM MUSIC_SERVICES WHERE rank=1")[0][0][0])
-                assistant.speak(random.choice(greetKeywords[0]))
+                Web().playOnline(
+                    query,
+                    objType="music",
+                    service=sqlite.execute(
+                        databPath=r"data/database/services.db",
+                        command=f"SELECT name FROM MUSIC_SERVICES WHERE rank=1",
+                    )[0][0][0],
+                )
+                syn.speak(random.choice(greetKeywords[0]))
 
 
 class Question:
@@ -615,7 +728,16 @@ class Question:
         Checks whether the provided query is a question or not.
         """
         __temp = False
-        qWords = sqlite.execute(databPath=r"data/database/attributes.db", command="SELECT * FROM KEYWORDS;", matrix=False)[0][0][1].replace("(", "", 1).replace(")", "", 1).split(", ")
+        qWords = (
+            sqlite.execute(
+                databPath=r"data/database/attributes.db",
+                command="SELECT * FROM KEYWORDS;",
+                matrix=False,
+            )[0][0][1]
+            .replace("(", "", 1)
+            .replace(")", "", 1)
+            .split(", ")
+        )
 
         print(qWords)
 

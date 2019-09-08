@@ -14,25 +14,25 @@ def path():
     sys.path.insert(0, os.getcwd())
 path()
 
-import datetime
-import os
-import random
-import re
-import shutil
-import subprocess
-import sys
-import traceback
-import webbrowser
+# import datetime
+# import os
+# import random
+# import re
+# import shutil
+# import subprocess
+# import sys
+# import traceback
+# import webbrowser
 
-import numpy as np
-import pandas as pd
-import requests
-import sklearn
-import wikipedia
+# import numpy as np
+# import pandas as pd
+# import requests
+# import sklearn
+# import wikipedia
 
-import assistant
-import tools.toolLib
-from sql_tools import sqlite
+# import assistant
+# import tools.toolLib
+# from sql_tools import sqlite
 
 # from . import faceRecognition as fr
 

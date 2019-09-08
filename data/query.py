@@ -5,14 +5,14 @@ databases = [
     "services.db",
     "attributes.db",
     "programInstallData.db",
-    "history.db"
+    # "history.db"
 ]
 
 query = [
     "services.sql",
     "attributes.sql",
     "programInstallData.sql",
-    "history.sql"
+    # "history.sql"
 ]
 
 

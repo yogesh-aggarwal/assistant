@@ -11,42 +11,11 @@ Jarvis AI project.
 """
 
 import datetime
-
-import speech_recognition as sr
-# from win32com.client import Dispatch
-
 import platform
-import pyttsx3
-from tools import toolLib
+from tools import synthesis as syn
+
 from sql_tools import sqlite
-
-
-engine = pyttsx3.init("nsss")
-voices = engine.setProperty("voices")
-print(voices)
-
-def exit_assist():
-    """
-    This function helps in quitting the program even if it is the "keep asking" state or not.
-    """
-    speak("Bye! See you again.")
-    quit()
-
-def keep_asking(method="voice"):
-    """
-    This function makes the assistant keep asking the user commands i.e. not terminates after the given task is compeleted.
-    """
-    while True:
-        take_command(method=method)
-
-
-def speak(audio):
-    """
-    Speaks the string provided.
-    """
-    # speak = Dispatch("SAPI.SpVoice")
-    # speak.Speak(audio)
-    print(audio)
+from tools.toolLib import Analyse
 
 
 def wish():
@@ -55,67 +24,61 @@ def wish():
     """
     hour = int(datetime.datetime.now().hour)
     if hour >= 0 and hour < 12:
-        speak("Good Morning!")
+        syn.speak("Good Morning!")
     elif hour >= 12 and hour < 18:
-        speak("Good Afternoon!")
+        syn.speak("Good Afternoon!")
     else:
-        speak("Good Evening!")
-    # speak("I am Jarvis! Chip number 227O4CB, Memory one Terabytes. How can I help you?")
-    speak("I am Jarvis! How can I help you?")
+        syn.speak("Good Evening!")
+    # syn.speak("I am Jarvis! Chip number 227O4CB, Memory one Terabytes. How can I help you?")
+    syn.speak("I am Jarvis! How can I help you?")
 
 
-def take_command(method="voice"):
+def main(method="voice", welcome=False, keep_asking=False):
     """
-    It takes voice input from user and returns string version of it.
+    Main block assistant assistant
     """
-    if method == "voice":
-        r = sr.Recognizer()
-        with sr.Microphone() as source:
-            print("\nListening...")
-            r.pause_threshold = 1
-            r.energy_threshold = 100
-            audio = r.listen(source)
-
-        query = None
-
-        try:
-            print("Recognizing...")
-            query = r.recognize_google(audio, language="en-in")
-            print(f"User said: {query}.")
-            # return query
-        except Exception as e:
-            print(f"EXCEPTION (assistant.py) ---> {e}")
-            if e:
-                speak("Sorry about that, I didn't hear anything.")
-
-    else:
-        # print(sqlite.execute("SELECT * FROM HISTORY", databPath=r"data/database/history.db")[0])
-        print(sqlite.execute("SELECT * FROM HISTORY WHERE solved='false'", databPath=r"data/database/history.db")[0])
-        query = input("Enter the query ---> ").lower()
-
     try:
-        analysis = toolLib.Analyse(query, platform=platform.system())
-        analysis.classify()
-        solved = input("Solved: ")
-        if not solved:
-            solved = "true"
-        else:
-            solved = "false"
+        if welcome:
+            wish()
 
-        sqlite.execute(f"INSERT INTO HISTORY VALUES('{query}', '{solved}')", databPath=r"data/database/history.db")
-    except Exception as e:
-        sqlite.execute(f"INSERT INTO HISTORY VALUES('{query}', 'false')", databPath=r"data/database/history.db")
-        # print(sqlite.execute("SELECT * FROM HISTORY", databPath=r"data/database/history.db")[0])
-        print(sqlite.execute("SELECT * FROM HISTORY WHERE solved='false'", databPath=r"data/database/history.db")[0])
-        raise e
+        while True:
+            if method == "voice":
+                query = syn.listen()
+            else:
+                query = input("Query: ")
+            try:
+                analysis = Analyse(query, platform=platform.system())
+                analysis.classify()
+
+                solved = input("Solved: ")
+                if not solved:
+                    solved = "true"
+                else:
+                    solved = "false"
+
+                sqlite.execute(
+                    f"INSERT INTO HISTORY VALUES('{query}', '{solved}')",
+                    databPath=r"data/database/history.db",
+                )
+            except Exception as e:
+                sqlite.execute(
+                    f"INSERT INTO HISTORY VALUES('{query}', 'false')",
+                    databPath=r"data/database/history.db",
+                )
+                # print(sqlite.execute("SELECT * FROM HISTORY", databPath=r"data/database/history.db")[0])
+                print(
+                    sqlite.execute(
+                        "SELECT * FROM HISTORY WHERE solved='false'",
+                        databPath=r"data/database/history.db",
+                    )[0]
+                )
+                raise e
+
+            if not keep_asking:
+                break
+    except Exception:
+        syn.speak("\nBye! See you again")
 
 
 if __name__ == "__main__":
-    # speak("I am Jarvis! How can I help you?")
-    # wish()
-
-    take_command(method="console")
-    # keep_asking(method="console")
-
-    # take_command()
-    # keep_asking()
+    main(method="console", welcome=False, keep_asking=False)
