@@ -12,13 +12,15 @@ import webbrowser
 import bs4
 import numpy as np
 import requests
-from sql_tools import sqlite
-from . import synthesis as syn
 
+from sql_tools import sqlite
 # import features.assist_games as games
 # import features.chatBot as chatBot
 # import features.faceRecognition as fr
 from tools.apiPlay import apiMusic, apiVideo
+
+from . import behaviour as bh
+from . import synthesis as syn
 
 webDomains = [".com", ".org", ".in", ".edu", ".net", ".arpa"]
 # webDomains = sqlite.execute(databPath=r"data/database/services.db", command="SELECT USAGE FROM DOMAIN")
@@ -428,15 +430,18 @@ class Analyse:
         # Open program
         if Tools().reOperation(query, "open", "at start"):
             self.openClassify(query.replace("open ", "", 1))
+            bh.init()
 
         # Play content
         elif Tools().reOperation(query, "play", "at start"):
             self.playClassify(query.replace("play ", ""))
+            bh.init()
 
         # Search content
         elif Tools().reOperation(query, "search", "at start"):
             var = Search()
             var.classify(query)
+            bh.init()
 
         # Open web
         elif Tools().reOperation(query, "go to", "at start"):
@@ -450,8 +455,8 @@ class Analyse:
             if domain != "No internet connection":
                 if domain != "Webpage does not exists":
                     webbrowser.open_new_tab("https://" + query + domain)
+                    bh.init()
             else:
-                # print("Error")
                 syn.speak("No internet connection")
 
         # Other search for questions on Google

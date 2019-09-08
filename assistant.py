@@ -15,7 +15,8 @@ import platform
 from tools import synthesis as syn
 
 from sql_tools import sqlite
-from tools_lib import bprint, cprint
+from tools_lib import bprint
+from tools.behaviour import terminate
 from tools.toolLib import Analyse
 
 
@@ -74,7 +75,8 @@ def main(method="voice", welcome=False, keep_asking=False):
                     )[0]
                 )
                 raise e
-
+            
+            terminate()
             if not keep_asking:
                 break
     except Exception as e:
