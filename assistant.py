@@ -13,9 +13,10 @@ Jarvis AI project.
 import datetime
 
 import speech_recognition as sr
-from win32com.client import Dispatch
+# from win32com.client import Dispatch
 
 from tools import toolLib
+from sql_tools import sqlite
 
 
 def exit_assist():
@@ -37,8 +38,9 @@ def speak(audio):
     """
     Speaks the string provided.
     """
-    speak = Dispatch("SAPI.SpVoice")
-    speak.Speak(audio)
+    # speak = Dispatch("SAPI.SpVoice")
+    # speak.Speak(audio)
+    print(audio)
 
 
 def wish():
@@ -81,13 +83,25 @@ def take_command(method="voice"):
                 speak("Sorry about that, I didn't hear anything.")
 
     else:
+        # print(sqlite.execute("SELECT * FROM HISTORY", databPath=r"data/database/history.db")[0])
+        print(sqlite.execute("SELECT * FROM HISTORY WHERE solved='false'", databPath=r"data/database/history.db")[0])
         query = input("Enter the query ---> ").lower()
 
     try:
         analysis = toolLib.Analyse(query)
         analysis.classify()
+        solved = input("Solved: ")
+        if not solved:
+            solved = "true"
+        else:
+            solved = "false"
+
+        sqlite.execute(f"INSERT INTO HISTORY VALUES('{query}', '{solved}')", databPath=r"data/database/history.db")
     except Exception as e:
-        print(e)
+        sqlite.execute(f"INSERT INTO HISTORY VALUES('{query}', 'false')", databPath=r"data/database/history.db")
+        # print(sqlite.execute("SELECT * FROM HISTORY", databPath=r"data/database/history.db")[0])
+        print(sqlite.execute("SELECT * FROM HISTORY WHERE solved='false'", databPath=r"data/database/history.db")[0])
+        raise e
 
 
 if __name__ == "__main__":

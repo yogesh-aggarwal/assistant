@@ -16,5 +16,6 @@ pip3 install SpeechRecognition
 pip3 install wikipedia
 pip3 install pathlib
 pip3 install sql-tools
+pip3 install tools-lib
 pip3 install playsound
 pip3 install opencv-python

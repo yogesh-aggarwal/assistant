@@ -7,7 +7,7 @@
 --=====================================================================================================================================================================================================
 ---> TABLE: Programs_data <---
 /* DESCRIPTION: Table containing the information about the programs location and open method. */
-DROP TABLE PROGRAMS_DATA;
+DROP TABLE IF EXISTS PROGRAMS_DATA;
 CREATE TABLE PROGRAMS_DATA (name TEXT PRIMARY KEY, shortName1 TEXT DEFAULT '===', shortName2 TEXT DEFAULT '===', shortName3 TEXT DEFAULT '===', shortName4 TEXT DEFAULT '===', shortName5 TEXT DEFAULT '===', location TEXT, fileName TEXT, locationMethod Text, category TEXT, openMethod TEXT);
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- DEV APPS --

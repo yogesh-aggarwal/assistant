@@ -1,17 +1,14 @@
-import json
 import webbrowser
 
 import bs4
 import requests
-from sql_tools import Sqlite3
+from sql_tools import sqlite
 
-import tools.toolLib
 
 
 class apiMusic:
     def gaana(name, album="", openLink=True):
-        datab = Sqlite3(databPath=r"data\database\services.db")
-        searchMethod = datab.execute("SELECT searchMethod FROM MUSIC_SERVICES")[0][0][0]
+        searchMethod = sqlite.execute("SELECT searchMethod FROM MUSIC_SERVICES", databPath=r"data/database/services.db")[0][0][0]
         # print(searchMethod)
         url = f"https://gaana.com{searchMethod}{name}"
         data = requests.get(url)

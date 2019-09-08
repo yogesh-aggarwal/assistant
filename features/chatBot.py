@@ -32,7 +32,7 @@ import wikipedia
 
 import assistant
 import tools.toolLib
-from sql_tools import Sqlite3 as sql
+from sql_tools import sqlite
 
 # from . import faceRecognition as fr
 

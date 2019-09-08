@@ -15,7 +15,7 @@ import sys
 
 import numpy as np
 import pandas as pd
-from sql_tools import Sqlite3 as sql
+from sql_tools import sqlite
 
 # import pygame
 
