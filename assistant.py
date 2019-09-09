@@ -50,7 +50,7 @@ def main(method="voice", welcome=False, keep_asking=False):
                 query = input("Query: ")
             try:
                 analysis = Analyse(query, platform=platform.system())
-                analysis.classify()
+                analysis.parse()
 
                 if "test" not in query:
                     solved = input("Solved: ")

@@ -30,6 +30,8 @@ class apiMusic:
                 ]
             )
 
+    def spotify(query, openLink=True):
+        syn.speak("Spotify is not available at present, please try after future updates")
 
 class apiVideo:
     def youtube(self, query, rand=False):

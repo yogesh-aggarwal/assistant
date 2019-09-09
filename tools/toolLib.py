@@ -66,7 +66,7 @@ class Web:
         """
         Checks the existance of the address provided.
 
-        If there is connection return problem return "No internet connection", else return True or False.
+        If there is connection return problem return "err_no_connection", else return True or False.
 
         Exists = True,
         Not exists = False
@@ -109,21 +109,11 @@ class Web:
         """
         Finds the web domain of the name provided.
 
-        If there is connection return problem return "No internet connection", else return True or False.
+        If there is connection return problem return "err_no_connection", else return True or False.
         """
-        __domain_presence = False
-        __domain = ""
-
         for domain in webDomains:
             domain = domain[0]
             if Tools().reOperation(query, domain, "at end"):
-                __domain = domain
-                __domain_presence = True
-                break
-
-        if not __domain_presence:
-            for domain in webDomains:
-                domain = domain[0]
                 if Web().checkWebExists(query=query + domain) == True:
                     return domain
                 elif Web().checkWebExists(query=query + domain) == False:
@@ -131,7 +121,7 @@ class Web:
                 else:
                     return False
         else:
-            return ""
+            return False
 
 
 class Search:
@@ -206,26 +196,29 @@ class Search:
                         )  # The search engine is at the start
                         if engine in engines:
                             break
-                queryType = "Search"
+                queryType = "search"
                 break
 
             else:
-                queryType = "Not search"
+                queryType = "not_search"
 
-        try:
-            wordList.remove(engine.lower())
-        except Exception:
-            pass
+        if queryType == "Search":
+            try:
+                wordList.remove(engine.lower())
+            except Exception:
+                pass
 
-        if wordList[0] in ["for", "at", "on"]:
-            wordList.pop(0)
-        if wordList[-1] in ["for", "at", "on"]:
-            wordList.pop(-1)
+            if wordList[0] in ["for", "at", "on"]:
+                wordList.pop(0)
+            if wordList[-1] in ["for", "at", "on"]:
+                wordList.pop(-1)
 
-        searchQuery = " ".join(wordList)
+            searchQuery = " ".join(wordList)
 
-        if engine != None:
-            self.searchEngine(query=searchQuery, engine=engine)
+            if engine != None:
+                self.searchEngine(query=searchQuery, engine=engine)
+        else:
+            syn.speak("I am unable to understand the query.")
 
     def searchEngine(self, query="", engine="Google"):
         """
@@ -336,6 +329,49 @@ class Analyse:
         self.query = query
         self.platform = platform.lower()
 
+    def parse(self):
+        query = self.query
+
+        # For words at start
+        words = (
+            "hey",
+            "jarvis",
+            "please",
+            "can",
+            "may",
+            "you",
+        )
+        for word in words:
+            if Tools().reOperation(query.lower(), word, "at start"):
+                query = query.lower().replace(word, "", 1).strip()
+        
+        # For words at start
+        words = (
+            "please"
+            "me",
+            "us",
+            "for friends",
+            "for my friends",
+            "for our friends",
+            "for family",
+            "for my family",
+            "for our family",
+            "for family",
+            "for my family",
+            "for our family",
+            "for family members",
+            "for my family members",
+            "for our family members",
+            ""
+        )
+        for word in words:
+            if Tools().reOperation(query.lower(), word, "at end"):
+                query = query.lower().replace(word, "", 1).strip()
+        
+        del words
+        self.query = query
+        self.classify()
+
     def classify(self, webDomains=webDomains):
         """
         Classifies the string provided to different categories.
@@ -367,12 +403,12 @@ class Analyse:
                 .replace(" ", "")
             )
             domain = Web().findDomain(query)
-            if domain != "No internet connection":
+            if domain != "err_no_connection":
                 if domain != "Webpage does not exists":
                     webbrowser.open_new_tab("https://" + query + domain)
                     bh.init()
             else:
-                syn.speak("No internet connection")
+                syn.speak("You don't have internet connection")
 
         # Other search for questions on Google
         elif query.split(" ")[0].upper() in Tools.strTolst(
@@ -402,7 +438,7 @@ class Analyse:
 
                 syn.speak(f"{query} is {ans}")
             except Exception:
-                syn.speak("No internet connection")
+                syn.speak("You don't have internet connection")
 
         # Game
         elif "game" in query:
@@ -465,7 +501,7 @@ class Analyse:
                                 os.startfile(
                                     f"{Tools().getUserPath}\\{location}\\{applicationName}"
                                 )
-                                syn.speak(random.choice(greetKeywords[0]))
+                                syn.speak(random.choice(greetKeywords))
                             else:
                                 # Application is of system
                                 os.system(applicationName)
@@ -474,7 +510,7 @@ class Analyse:
                             if openMethod == "exe":
                                 # Application is executable
                                 os.startfile(f"{location}\\{applicationName}")
-                                syn.speak(random.choice(greetKeywords[0]))
+                                syn.speak(random.choice(greetKeywords))
                             else:
                                 # Application is of system
                                 os.system(applicationName)
@@ -511,7 +547,7 @@ class Analyse:
                                         os.startfile(
                                             f"{Tools().getUserPath}\\{location}\\{applicationName}"
                                         )
-                                        syn.speak(random.choice(greetKeywords[0]))
+                                        syn.speak(random.choice(greetKeywords))
                                         break
                                     else:
                                         # Application is of system
@@ -523,7 +559,7 @@ class Analyse:
                                     if openMethod == "exe":
                                         # Application is executable
                                         os.startfile(f"{location}\\{applicationName}")
-                                        syn.speak(random.choice(greetKeywords[0]))
+                                        syn.speak(random.choice(greetKeywords))
                                         break
                                     else:
                                         # Application is of system
@@ -605,12 +641,15 @@ class Analyse:
                 query = query.replace(i, "", -1)
                 break
 
-        if service == "gaana":
-            apiMusic.gaana(query)
+        services = {"gaana": apiMusic.gaana, "spotify": apiMusic.spotify}
 
-        else:
+        try:
+            services[service](query)
+        except Exception:
+            if service is not None:
+                syn.speak(f"{service} is not supported yet, I am opening it on YouTube")
             apiVideo().youtube(query)
-            syn.speak(random.choice(greetKeywords[0]))
+            syn.speak(random.choice(greetKeywords))
 
 
 class Question:
