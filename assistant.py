@@ -52,28 +52,30 @@ def main(method="voice", welcome=False, keep_asking=False):
                 analysis = Analyse(query, platform=platform.system())
                 analysis.classify()
 
-                solved = input("Solved: ")
-                if not solved:
-                    solved = "true"
-                else:
-                    solved = "false"
+                if "test" not in query:
+                    solved = input("Solved: ")
+                    if not solved:
+                        solved = "true"
+                    else:
+                        solved = "false"
 
-                sqlite.execute(
-                    f"INSERT INTO HISTORY VALUES('{query}', '{solved}')",
-                    databPath=r"data/database/history.db",
-                )
-            except Exception as e:
-                sqlite.execute(
-                    f"INSERT INTO HISTORY VALUES('{query}', 'false')",
-                    databPath=r"data/database/history.db",
-                )
-                # print(sqlite.execute("SELECT * FROM HISTORY", databPath=r"data/database/history.db")[0])
-                print(
                     sqlite.execute(
-                        "SELECT * FROM HISTORY WHERE solved='false'",
+                        f"INSERT INTO HISTORY VALUES('{query}', '{solved}')",
                         databPath=r"data/database/history.db",
-                    )[0]
-                )
+                    )
+            except Exception as e:
+                if "test" not in query:
+                    sqlite.execute(
+                        f"INSERT INTO HISTORY VALUES('{query}', 'false')",
+                        databPath=r"data/database/history.db",
+                    )
+                    # print(sqlite.execute("SELECT * FROM HISTORY", databPath=r"data/database/history.db")[0])
+                    print(
+                        sqlite.execute(
+                            "SELECT * FROM HISTORY WHERE solved='false'",
+                            databPath=r"data/database/history.db",
+                        )[0]
+                    )
                 raise e
 
             terminate()

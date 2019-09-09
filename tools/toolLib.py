@@ -10,23 +10,15 @@ import re
 import webbrowser
 
 import bs4
-import numpy as np
 import requests
 
 from sql_tools import sqlite
-# import features.assist_games as games
-# import features.chatBot as chatBot
-# import features.faceRecognition as fr
-from tools.apiPlay import apiMusic, apiVideo
 
 from . import behaviour as bh
 from . import synthesis as syn
-
-webDomains = [".com", ".org", ".in", ".edu", ".net", ".arpa"]
-# webDomains = sqlite.execute(databPath=r"data/database/services.db", command="SELECT USAGE FROM DOMAIN")
-greetKeywords = np.array(
-    [["Sure!", "Okay!", "Here it is", "Here is what you have demanded"]]
-)
+from .apiPlay import apiMusic, apiVideo
+from .constants import (dbAttributes, dbProgramInstallData, dbServices,
+                        greetKeywords, webDomains)
 
 
 class Web:
@@ -141,22 +133,6 @@ class Web:
         else:
             return ""
 
-    def playOnline(self, query, objType="video", service="YouTube", rand=False):
-        if Web.checkConnection():
-            import webbrowser
-
-            webbrowser.open_new_tab(
-                Search().videoSearch(query, service="YouTube", rand=rand)
-            )
-        else:
-            # REMOVE IT IN FUTURE
-            import webbrowser
-
-            webbrowser.open_new_tab(
-                Search().videoSearch(query, service="YouTube", rand=rand)
-            )
-            # syn.speak("You don't have internet connection!")
-
 
 class Search:
     """
@@ -172,7 +148,7 @@ class Search:
         """
         engines = sqlite.execute(
             "SELECT name FROM ENGINES",
-            databPath=r"data/database/services.db",
+            databPath=dbServices,
             matrix=False,
             inlineData=True,
             splitByColumns=True,
@@ -261,67 +237,6 @@ class Search:
         method = Tools().getSearchMethod(engine)
         webbrowser.open_new_tab(f"https://{engine}.com{method}{query}")
 
-    def videoSearch(self, query="", service="", rand=False):
-        """
-        Returns the url of the video of the trending(according to the database [services.db]) video engine. By default it opens the first video.
-        """
-        if not service:
-            host = sqlite.execute(
-                databPath=r"data/database/services.db",
-                command=f"SELECT host FROM VIDEO_SERVICES WHERE rank=1",
-            )[0][0][0]
-        else:
-            host = sqlite.execute(
-                databPath=r"data/database/services.db",
-                command=f"SELECT host FROM VIDEO_SERVICES WHERE name='{service}'",
-            )[0][0][0]
-
-        searchMethod = sqlite.execute(
-            databPath=r"data/database/services.db",
-            command=f"SELECT searchMethod FROM VIDEO_SERVICES WHERE host='{host}'",
-        )[0][0][0]
-        playMethod = sqlite.execute(
-            databPath=r"data/database/services.db",
-            command=f"SELECT playMethod FROM VIDEO_SERVICES WHERE host='{host}'",
-        )[0][0][0]
-
-        if not searchMethod:
-            syn.speak(
-                "The video service doesn't exists. So I am opening it on other service."
-            )
-            host = sqlite.execute(
-                databPath=r"data/database/services.db",
-                command=f"SELECT host FROM VIDEO_SERVICES WHERE rank=1",
-            )[0][0][0]
-            searchMethod = sqlite.execute(
-                databPath=r"data/database/services.db",
-                command=f"SELECT searchMethod FROM VIDEO_SERVICES WHERE rank=1",
-            )[0][0][0]
-            playMethod = sqlite.execute(
-                databPath=r"data/database/services.db",
-                command=f"SELECT playMethod FROM VIDEO_SERVICES WHERE rank=1",
-            )[0][0][0]
-
-        link = f"{host}{searchMethod}{query}"
-
-        res = requests.get(f"{host}{searchMethod}{query}").text
-        soup = bs4.BeautifulSoup(res, "lxml")
-        links = []
-        for link in soup.find_all("a", href=True):
-            links.append(link["href"])
-
-        vids = []
-        for link in links:
-            if playMethod in link:
-                vids.append(link)
-                if not rand:
-                    break
-
-        if rand:
-            return f"{host}{random.choice(vids)}"
-        else:
-            return f"{host}{vids[0]}"
-
 
 class Tools:
     """
@@ -338,13 +253,13 @@ class Tools:
         # Get methods from sql database and map them to dicts.
         try:
             return sqlite.execute(
-                databPath=r"data/database/services.db",
+                databPath=dbServices,
                 command=f"SELECT METHOD FROM ENGINES WHERE NAME='{engine.capitalize()}'",
                 matrix=False,
             )[0][0][0]
         except Exception:
             return sqlite.execute(
-                databPath=r"data/database/services.db",
+                databPath=dbServices,
                 command=f"SELECT METHOD FROM ENGINES WHERE NAME='Google'",
                 matrix=False,
             )[0][0][0]
@@ -462,9 +377,7 @@ class Analyse:
         # Other search for questions on Google
         elif query.split(" ")[0].upper() in Tools.strTolst(
             sqlite.execute(
-                databPath=r"data/database/attributes.db",
-                command="SELECT * FROM KEYWORDS;",
-                matrix=False,
+                databPath=dbAttributes, command="SELECT * FROM KEYWORDS;", matrix=False
             )[0][0][1]
         ):
             # SCRAP GOOGLE TO GET RESULTS
@@ -494,6 +407,7 @@ class Analyse:
         # Game
         elif "game" in query:
             import games
+
             games.init()
 
         # Exiting
@@ -503,7 +417,7 @@ class Analyse:
 
         # Testing query
         elif "test" in query:
-            print(Question().checkQuestion(query=query.replace("test ", "")))
+            pass
 
         # Not understood
         else:
@@ -511,234 +425,194 @@ class Analyse:
                 "I am not able to understand your query at the moment. Please try after future updates."
             )
 
-    @staticmethod
-    def openClassify(query):
+    def openClassify(self, query):
         """
         Classifies the query containing "open" keyword.
         """
-        try:
-            query = query.lower().capitalize()
+        if self.platform == "Windows":
+            # Try whether the application is present on machine or not.
             try:
-                location = sqlite.execute(
-                    databPath=r"data/database/programInstallData.db",
-                    command=f'SELECT location FROM PROGRAMS_DATA WHERE name="{query}"',
-                    matrix=False,
-                )[0][0][0]
-            except Exception:
-                location = ""
-            try:
-                if location != "":
-                    applicationName = sqlite.execute(
-                        databPath=r"data/database/programInstallData.db",
-                        command=f'SELECT fileName FROM PROGRAMS_DATA WHERE name="{query}"',
+                query = query.lower().capitalize()
+                # Getting the location of the program
+                try:
+                    location = sqlite.execute(
+                        databPath=dbProgramInstallData,
+                        command=f'SELECT location FROM PROGRAMS_DATA WHERE name="{query}"',
+                        matrix=False,
                     )[0][0][0]
-                    locationMethod = sqlite.execute(
-                        databPath=r"data/database/programInstallData.db",
-                        command=f'SELECT locationMethod FROM PROGRAMS_DATA WHERE name="{query}"',
-                    )[0][0][0]
-                    openMethod = sqlite.execute(
-                        databPath=r"data/database/programInstallData.db",
-                        command=f'SELECT openMethod FROM PROGRAMS_DATA WHERE name="{query}"',
-                    )[0][0][0]
-                    if locationMethod == "user":
-                        if openMethod == "exe":
-                            os.startfile(
-                                f"{Tools().getUserPath}\\{location}\\{applicationName}"
-                            )
-                            syn.speak(random.choice(greetKeywords[0]))
-                        else:
-                            os.system(applicationName)
-                    else:
-                        if openMethod == "exe":
-                            os.startfile(f"{location}\\{applicationName}")
-                            syn.speak(random.choice(greetKeywords[0]))
-                        else:
-                            os.system(applicationName)
-                else:
-                    for shortNameCount in range(1, 7):
-                        try:
-                            location = sqlite.execute(
-                                databPath=r"data/database/programInstallData.db",
-                                command=f'SELECT location FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
-                            )[0][0][0]
-                        except Exception:
-                            location = ""
+                except Exception:
+                    location = ""
 
-                        if location != "":
-                            applicationName = sqlite.execute(
-                                databPath=r"data/database/programInstallData.db",
-                                command=f'SELECT fileName FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
-                            )[0][0][0]
-                            locationMethod = sqlite.execute(
-                                databPath=r"data/database/programInstallData.db",
-                                command=f'SELECT locationMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
-                            )[0][0][0]
-                            openMethod = sqlite.execute(
-                                databPath=r"data/database/programInstallData.db",
-                                command=f'SELECT openMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
-                            )[0][0][0]
+                try:
+                    if location != "":
+                        applicationName = sqlite.execute(
+                            databPath=dbProgramInstallData,
+                            command=f'SELECT fileName FROM PROGRAMS_DATA WHERE name="{query}"',
+                        )[0][0][0]
+                        locationMethod = sqlite.execute(
+                            databPath=dbProgramInstallData,
+                            command=f'SELECT locationMethod FROM PROGRAMS_DATA WHERE name="{query}"',
+                        )[0][0][0]
+                        openMethod = sqlite.execute(
+                            databPath=dbProgramInstallData,
+                            command=f'SELECT openMethod FROM PROGRAMS_DATA WHERE name="{query}"',
+                        )[0][0][0]
 
-                            if locationMethod == "user":
-                                if openMethod == "exe":
-                                    os.startfile(
-                                        f"{Tools().getUserPath}\\{location}\\{applicationName}"
-                                    )
-                                    syn.speak(random.choice(greetKeywords[0]))
-                                    break
-                                else:
-                                    os.system(applicationName)
-                                    break
-                                break
+                        if locationMethod == "user":
+                            # Application is dependent of user home path
+                            if openMethod == "exe":
+                                # Application is executable
+                                os.startfile(
+                                    f"{Tools().getUserPath}\\{location}\\{applicationName}"
+                                )
+                                syn.speak(random.choice(greetKeywords[0]))
                             else:
-                                if openMethod == "exe":
-                                    os.startfile(f"{location}\\{applicationName}")
-                                    syn.speak(random.choice(greetKeywords[0]))
+                                # Application is of system
+                                os.system(applicationName)
+                        else:
+                            # Application is independent of user home path
+                            if openMethod == "exe":
+                                # Application is executable
+                                os.startfile(f"{location}\\{applicationName}")
+                                syn.speak(random.choice(greetKeywords[0]))
+                            else:
+                                # Application is of system
+                                os.system(applicationName)
+                    else:
+                        # Checking for short names
+                        for shortNameCount in range(1, 7):
+                            # Getting location
+                            try:
+                                location = sqlite.execute(
+                                    databPath=dbProgramInstallData,
+                                    command=f'SELECT location FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
+                                )[0][0][0]
+                            except Exception:
+                                location = ""
+
+                            if location != "":
+                                applicationName = sqlite.execute(
+                                    databPath=dbProgramInstallData,
+                                    command=f'SELECT fileName FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
+                                )[0][0][0]
+                                locationMethod = sqlite.execute(
+                                    databPath=dbProgramInstallData,
+                                    command=f'SELECT locationMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
+                                )[0][0][0]
+                                openMethod = sqlite.execute(
+                                    databPath=dbProgramInstallData,
+                                    command=f'SELECT openMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
+                                )[0][0][0]
+
+                                # Check whether the program opens according user home path
+                                if locationMethod == "user":
+                                    if openMethod == "exe":
+                                        # Application is executable
+                                        os.startfile(
+                                            f"{Tools().getUserPath}\\{location}\\{applicationName}"
+                                        )
+                                        syn.speak(random.choice(greetKeywords[0]))
+                                        break
+                                    else:
+                                        # Application is of system
+                                        os.system(applicationName)
+                                        break
                                     break
                                 else:
-                                    os.system(applicationName)
+                                    # Independent of user home path
+                                    if openMethod == "exe":
+                                        # Application is executable
+                                        os.startfile(f"{location}\\{applicationName}")
+                                        syn.speak(random.choice(greetKeywords[0]))
+                                        break
+                                    else:
+                                        # Application is of system
+                                        os.system(applicationName)
+                                        break
                                     break
-                                break
-                        else:
-                            if shortNameCount == 6:
-                                raise FileNotFoundError("Application doesn't exists")
-            except Exception as e:
-                if str(e) != "index 0 is out of bounds for axis 0 with size 0":
-                    raise FileNotFoundError("Application doesn't exists")
+                            else:
+                                if shortNameCount == 6:
+                                    # Everything has been tried & application not found
+                                    raise FileNotFoundError(
+                                        "Application doesn't exists"
+                                    )
+                except Exception as e:
+                    if str(e) != "index 0 is out of bounds for axis 0 with size 0":
+                        raise FileNotFoundError("Application doesn't exists")
+            # Checking for webpage
+            except Exception:
+                if Tools().reOperation(query, "webpage", "at start"):
+                    if Web(query).checkConnection():
+                        if Web(query).checkWebExists():
+                            print("Open webpage")
+                    else:
+                        print("Webpage does not exists")
 
-        except Exception:
-            if Tools().reOperation(query, "webpage", "at start"):
-                if Web(query).checkConnection():
-                    if Web(query).checkWebExists():
-                        print("Open webpage")
+                elif Tools().reOperation(query, "my", "at start"):
+                    query = query.replace("my", "", 1)
+                    if "folder" in query:
+                        query = query.replace("folder", "").replace(" ", "", 1)
+                        # Add the user path to the folder name.
+                        os.startfile(f"{os.path.expanduser('~')}\\{query}")
+
+                    elif "favourate" in query:
+                        query.replace("favourate", "")
+                        if "video" in query:
+                            # Get the file from the sql database.
+                            file = r"test\files\video\vid_1.mp4"
+                            os.startfile(file)
+                        elif "music" or "song" in query:
+                            # Get the file from the sql database.
+                            file = r"test\files\music\mus_1.mp3"
+                            os.startfile(file)
+                        elif "image" or "photo" in query:
+                            # Get the file from the sql database.
+                            file = r"test\files\image\img_1.jpg"
+                            os.startfile(file)
+
                 else:
-                    print("Webpage does not exists")
+                    query = (
+                        query.replace("go to", "", 1)
+                        .replace("https://", "", 1)
+                        .replace("http://", "", 1)
+                        .replace(" ", "")
+                    )
+                    domain = Web().findDomain(query)
+                    if domain:
+                        webbrowser.open_new_tab("https://" + query + domain)
+                    else:
+                        syn.speak("You don't have internet connection")
 
-            elif Tools().reOperation(query, "my", "at start"):
-                query = query.replace("my", "", 1)
-                if "folder" in query:
-                    query = query.replace("folder", "").replace(" ", "", 1)
-                    # Add the user path to the folder name.
-                    os.startfile(f"{os.path.expanduser('~')}\\{query}")
-
-                elif "favourate" in query:
-                    query.replace("favourate", "")
-                    if "video" in query:
-                        # Get the file from the sql database.
-                        file = r"test\files\video\vid_1.mp4"
-                        os.startfile(file)
-                    elif "music" or "song" in query:
-                        # Get the file from the sql database.
-                        file = r"test\files\music\mus_1.mp3"
-                        os.startfile(file)
-                    elif "image" or "photo" in query:
-                        # Get the file from the sql database.
-                        file = r"test\files\image\img_1.jpg"
-                        os.startfile(file)
-
-            else:
-                query = (
-                    query.replace("go to", "", 1)
-                    .replace("https://", "", 1)
-                    .replace("http://", "", 1)
-                    .replace(" ", "")
-                )
-                domain = Web().findDomain(query)
-                if domain:
-                    webbrowser.open_new_tab("https://" + query + domain)
-                else:
-                    syn.speak("You don't have internet connection")
+        else:
+            syn.speak(
+                "The operating system is not supported for such type of operations"
+            )
 
     @staticmethod
     def playClassify(query):
         """
         Classifies the query containing "play" keyword.
         """
-        if "video" in query:
-            # Get the greet keywords from the sql database.
-            # print("Playing")
-            syn.speak(random.choice(greetKeywords[0]))
-            video_folder = sqlite.execute(
-                databPath=r"data/database/attributes.db",
-                command="SELECT value FROM USER_ATTRIBUTES WHERE name='videoDirectory'",
-                matrix=False,
-                inlineData=True,
-            )[0][0][0]
+        wordList = query.split(" ")
+        __temp = wordList.copy()
+        __temp.pop(-1)
+        service = None
 
-            if not video_folder:
-                # Link to different video services. Get the preferred service from the user database if available.
-                pass
-            else:
-                # Get the folder path from the sql database.
-                files = os.listdir(video_folder)
-                os.startfile(f"{video_folder}/{random.choice(files)}")
+        query = " ".join(__temp)
+        for i in [" on", " in", " at", " with"]:
+            if Tools().reOperation(" ".join(__temp), i, "at end"):
+                service = wordList[-1].lower()
+                query = query.replace(i, "", -1)
+                break
 
-        elif "music" in query or "song" in query:
-            if Tools().reOperation(query, ["music", "song"], "at start"):
-                syn.speak(random.choice(greetKeywords[0]))
-
-                music_folder = sqlite.execute(
-                    databPath=r"data/database/attributes.db",
-                    command="SELECT value FROM USER_ATTRIBUTES WHERE name='musicDirectory'",
-                    matrix=False,
-                    inlineData=True,
-                )[0][0][0]
-
-                if not music_folder:
-                    print("No folder available for playing song.")
-                    Web().playOnline(query, objType="music")
-                    # Link to different music services. Get the preferred service from the user database if available.
-                else:
-                    # Get the folder path from the sql database.
-                    try:
-                        files = os.listdir(music_folder)
-                        os.startfile(f"{music_folder}/{random.choice(files)}")
-                    except:
-                        Web().playOnline("latest songs", rand=True)
-
-            else:
-                Web().playOnline(query)
-                syn.speak(random.choice(greetKeywords[0]))
-
+        if service == "gaana":
+            apiMusic.gaana(query)
 
         else:
-            musicServices = sqlite.execute(
-                databPath=r"data/database/services.db",
-                command=f"SELECT name FROM MUSIC_SERVICES",
-                splitByColumns=True,
-            )[0][0]
-            videoServices = sqlite.execute(
-                databPath=r"data/database/services.db",
-                command=f"SELECT name FROM VIDEO_SERVICES",
-                splitByColumns=True,
-            )[0][0]
+            apiVideo().youtube(query)
+            syn.speak(random.choice(greetKeywords[0]))
 
-            wordList = query.split(" ")
-            __temp = wordList.copy()
-            __temp.pop(-1)
-            service = None
 
-            query = " ".join(__temp)
-            for i in [" on", " in", " at", " with"]:
-                if Tools().reOperation(" ".join(__temp), i, "at end"):
-                    service = wordList[-1]
-                    query = query.replace(i, "", -1)
-                    break
-
-            if service == "gaana":
-                apiMusic.gaana(query)
-
-            else:
-                Web().playOnline(
-                    query,
-                    objType="music",
-                    service=sqlite.execute(
-                        databPath=r"data/database/services.db",
-                        command=f"SELECT name FROM MUSIC_SERVICES WHERE rank=1",
-                    )[0][0][0],
-                )
-                syn.speak(random.choice(greetKeywords[0]))
-
-    
 class Question:
     def __init__(self):
         self.quesType = ""
@@ -750,9 +624,7 @@ class Question:
         __temp = False
         qWords = (
             sqlite.execute(
-                databPath=r"data/database/attributes.db",
-                command="SELECT * FROM KEYWORDS;",
-                matrix=False,
+                databPath=dbAttributes, command="SELECT * FROM KEYWORDS;", matrix=False
             )[0][0][1]
             .replace("(", "", 1)
             .replace(")", "", 1)

@@ -1,29 +1,64 @@
+import random
 import webbrowser
 
 import bs4
 import requests
-from sql_tools import sqlite
 
+from sql_tools import sqlite
+from . import synthesis as syn
+from .constants import dbServices
+
+# from .toolLib import Search, Web
 
 
 class apiMusic:
-    def gaana(name, album="", openLink=True):
-        searchMethod = sqlite.execute("SELECT searchMethod FROM MUSIC_SERVICES", databPath=r"data/database/services.db")[0][0][0]
-        # print(searchMethod)
-        url = f"https://gaana.com{searchMethod}{name}"
-        data = requests.get(url)
-        soup = str(bs4.BeautifulSoup(data.text, 'html.parser'))
-        start = soup.index('"https://gaana.com/song')
-        stop = soup.index('"', start+1)
-        link = soup[start:stop].replace('"', "")
+    def gaana(query, openLink=True):
+        host, searchMethod = sqlite.execute(
+            databPath=dbServices,
+            command=f"SELECT host, searchMethod FROM MUSIC_SERVICES WHERE RANK=1",
+        )[0][0]
 
-        del url, data, soup, start, stop
+        res = requests.get(f"{host}{searchMethod}{query}").text
         if openLink:
-            webbrowser.open_new_tab(link)
-            del link
-        else:
-            return link
+            webbrowser.open_new_tab(
+                res[
+                    res.index('<h3 class="item-heading"><a href="')
+                    + len('<h3 class="item-heading"><a href="') : res.index(
+                        ' class="rt_arw " '
+                    )
+                    - 1
+                ]
+            )
 
 
 class apiVideo:
-    pass
+    def youtube(self, query, rand=False):
+        host, searchMethod, playMethod = sqlite.execute(
+            databPath=dbServices,
+            command=f"SELECT host, searchMethod, playMethod FROM VIDEO_SERVICES WHERE name='YouTube'",
+        )[0][0]
+
+        link = f"{host}{searchMethod}{query}"
+
+        res = requests.get(f"{host}{searchMethod}{query}").text
+        soup = bs4.BeautifulSoup(res, "lxml")
+        links = []
+        for link in soup.find_all("a", href=True):
+            links.append(link["href"])
+
+        vids = []
+        for link in links:
+            if playMethod in link:
+                vids.append(link)
+                if not rand:
+                    break
+
+        try:
+            if rand:
+                link = f"{host}{random.choice(vids)}"
+            else:
+                link = f"{host}{vids[0]}"
+
+            webbrowser.open_new_tab(link)
+        except Exception:
+            pass
