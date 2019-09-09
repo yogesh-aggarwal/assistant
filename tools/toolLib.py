@@ -12,6 +12,7 @@ import webbrowser
 import bs4
 import requests
 
+import chatbot as bot
 from sql_tools import sqlite
 
 from . import behaviour as bh
@@ -333,22 +334,14 @@ class Analyse:
         query = self.query
 
         # For words at start
-        words = (
-            "hey",
-            "jarvis",
-            "please",
-            "can",
-            "may",
-            "you",
-        )
+        words = ("hey", "jarvis", "please", "can", "may", "you")
         for word in words:
             if Tools().reOperation(query.lower(), word, "at start"):
                 query = query.lower().replace(word, "", 1).strip()
-        
+
         # For words at start
         words = (
-            "please"
-            "me",
+            "please" "me",
             "us",
             "for friends",
             "for my friends",
@@ -362,12 +355,12 @@ class Analyse:
             "for family members",
             "for my family members",
             "for our family members",
-            ""
+            "",
         )
         for word in words:
             if Tools().reOperation(query.lower(), word, "at end"):
                 query = query.lower().replace(word, "", 1).strip()
-        
+
         del words
         self.query = query
         self.classify()
@@ -453,7 +446,7 @@ class Analyse:
 
         # Testing query
         elif "test" in query:
-            pass
+            bot.init()
 
         # Not understood
         else:
