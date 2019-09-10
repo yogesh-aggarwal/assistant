@@ -13,7 +13,7 @@ import bs4
 import requests
 
 import chatbot as bot
-from api.apiPlay import apiMusic, apiVideo
+from api.play import apiMusic, apiVideo
 from sql_tools import sqlite
 
 from . import behaviour as bh
