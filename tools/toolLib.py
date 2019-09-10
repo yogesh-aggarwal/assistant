@@ -657,7 +657,7 @@ class Analyse:
         except Exception:
             if service is not None:
                 syn.speak(f"{service} is not supported yet, I am opening it on YouTube")
-            services["youtube"](query, openLink=True)
+            services["youtube"](query)
             syn.speak(random.choice(greetKeywords))
 
 
