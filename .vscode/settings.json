@@ -18,5 +18,9 @@
     "python.linting.pep8Enabled": false,
     "python.linting.enabled": true,
     "python.linting.pylamaEnabled": true,
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "files.associations": {
+        "stdexcept": "cpp",
+        "iostream": "cpp"
+    }
 }
