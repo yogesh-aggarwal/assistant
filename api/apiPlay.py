@@ -5,14 +5,12 @@ import bs4
 import requests
 
 from sql_tools import sqlite
-from . import synthesis as syn
-from .constants import dbServices
-
-# from .toolLib import Search, Web
+from tools import synthesis as syn
+from tools.constants import dbServices
 
 
 class apiMusic:
-    def gaana(query, openLink=True):
+    def gaana(self, query, openLink=True):
         host, searchMethod = sqlite.execute(
             databPath=dbServices,
             command=f"SELECT host, searchMethod FROM MUSIC_SERVICES WHERE RANK=1",
@@ -29,12 +27,12 @@ class apiMusic:
 
         return link
 
-    def spotify(query, openLink=True):
+    def spotify(self, query, openLink=True):
         syn.speak(
             "Spotify is not available at the moment, please try after future updates"
         )
 
-    def youtubeMusic(query, openLink=True, rand=False):
+    def youtubeMusic(self, query, openLink=True, rand=False):
         link = apiVideo.youtube(query, openLink=False, rand=rand)
         link = link.replace("https://youtube.com", "https://music.youtube.com")
         if openLink:
@@ -43,7 +41,7 @@ class apiMusic:
 
 
 class apiVideo:
-    def youtube(query, openLink=True, rand=False):
+    def youtube(self, query, openLink=True, rand=False):
         host, searchMethod, playMethod = sqlite.execute(
             databPath=dbServices,
             command=f"SELECT host, searchMethod, playMethod FROM VIDEO_SERVICES WHERE name='YouTube'",
@@ -69,7 +67,7 @@ class apiVideo:
                 link = f"{host}{random.choice(vids)}"
             else:
                 link = f"{host}{vids[0]}"
-            print(link)
+
             if openLink:
                 webbrowser.open_new_tab(link)
 

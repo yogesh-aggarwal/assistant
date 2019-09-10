@@ -13,18 +13,13 @@ import bs4
 import requests
 
 import chatbot as bot
+from api.apiPlay import apiMusic, apiVideo
 from sql_tools import sqlite
 
 from . import behaviour as bh
 from . import synthesis as syn
-from .apiPlay import apiMusic, apiVideo
-from .constants import (
-    dbAttributes,
-    dbProgramInstallData,
-    dbServices,
-    greetKeywords,
-    webDomains,
-)
+from .constants import (dbAttributes, dbProgramInstallData, dbServices,
+                        greetKeywords, webDomains)
 
 
 class Web:
@@ -657,14 +652,11 @@ class Analyse:
         }
 
         try:
-            try:
-                services[service](query)
-            except Exception as e:
-                print(e)
+            services[service](query)
         except Exception:
             if service is not None:
                 syn.speak(f"{service} is not supported yet, I am opening it on YouTube")
-            apiVideo().youtube(query, openLink=False)
+            apiVideo().youtube(query, openLink=True)
             syn.speak(random.choice(greetKeywords))
 
 
@@ -686,8 +678,6 @@ class Question:
             .split(", ")
         )
 
-        print(qWords)
-
         for word in qWords:
             if Tools().reOperation(query.upper(), word, "at start"):
                 __temp = True
@@ -695,7 +685,6 @@ class Question:
                 break
 
         self.quesType = self.quesType.lower()
-        print(self.quesType)
 
         return __temp
 
