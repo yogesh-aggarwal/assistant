@@ -648,6 +648,9 @@ class Analyse:
                 break
 
         services = {
+            # Video services
+            "youtube": apiVideo.youtube,
+            # Music services
             "gaana": apiMusic.gaana,
             "spotify": apiMusic.spotify,
             "youtubeMusic": apiMusic.youtubeMusic,
