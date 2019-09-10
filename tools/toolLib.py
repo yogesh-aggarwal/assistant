@@ -341,8 +341,9 @@ class Analyse:
 
         # For words at start
         words = (
-            "please" "me",
-            "us",
+            "please",
+            "for me",
+            "for us",
             "for friends",
             "for my friends",
             "for our friends",
