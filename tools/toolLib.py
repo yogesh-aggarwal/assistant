@@ -654,8 +654,7 @@ class Analyse:
 
         try:
             services[service](query)
-        except Exception as e:
-            print(e)
+        except Exception:
             if service is not None:
                 syn.speak(f"{service} is not supported yet, I am opening it on YouTube")
             services["youtube"](query, openLink=True)
