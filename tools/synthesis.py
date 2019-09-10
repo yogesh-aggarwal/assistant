@@ -2,6 +2,8 @@
 Synthesis extention for Jarvis AI project.
 """
 
+# import os
+
 import speech_recognition as sr
 
 
@@ -32,4 +34,5 @@ def speak(s):
     """
     Speaks the string provided.
     """
+    # os.system(f"espeak '{s}'")
     print(s)

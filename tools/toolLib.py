@@ -18,8 +18,13 @@ from sql_tools import sqlite
 from . import behaviour as bh
 from . import synthesis as syn
 from .apiPlay import apiMusic, apiVideo
-from .constants import (dbAttributes, dbProgramInstallData, dbServices,
-                        greetKeywords, webDomains)
+from .constants import (
+    dbAttributes,
+    dbProgramInstallData,
+    dbServices,
+    greetKeywords,
+    webDomains,
+)
 
 
 class Web:
@@ -410,7 +415,6 @@ class Analyse:
             )[0][0][1]
         ):
             # SCRAP GOOGLE TO GET RESULTS
-
             engine = "google"
             searchMethod = Tools().getSearchMethod(engine)
             link = "https://gaana.com/search/saaho"
@@ -623,25 +627,41 @@ class Analyse:
         Classifies the query containing "play" keyword.
         """
         wordList = query.split(" ")
-        __temp = wordList.copy()
-        __temp.pop(-1)
         service = None
 
-        query = " ".join(__temp)
+        query = " ".join(wordList)
+
         for i in [" on", " in", " at", " with"]:
-            if Tools().reOperation(" ".join(__temp), i, "at end"):
-                service = wordList[-1].lower()
-                query = query.replace(i, "", -1)
+            try:
+                query = query.replace("youtube music", "youtubeMusic")
+            except Exception:
+                pass
+
+        wordList = query.split(" ")
+
+        for i in [" on", " in", " at", " with"]:
+            if Tools().reOperation(
+                " ".join(wordList[: len(wordList) - 1]), i, "at end"
+            ):
+                service = wordList[-1]
+                query = query.replace(i, "", -1).replace(service, "", -1)
                 break
 
-        services = {"gaana": apiMusic.gaana, "spotify": apiMusic.spotify}
+        services = {
+            "gaana": apiMusic.gaana,
+            "spotify": apiMusic.spotify,
+            "youtubeMusic": apiMusic.youtubeMusic,
+        }
 
         try:
-            services[service](query)
+            try:
+                services[service](query)
+            except Exception as e:
+                print(e)
         except Exception:
             if service is not None:
                 syn.speak(f"{service} is not supported yet, I am opening it on YouTube")
-            apiVideo().youtube(query)
+            apiVideo().youtube(query, openLink=False)
             syn.speak(random.choice(greetKeywords))
 
 

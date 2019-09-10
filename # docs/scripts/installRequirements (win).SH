@@ -1,4 +1,4 @@
-REM PYTHON INSTALLS
+# PYTHON INSTALLS
 
 pip install pywin32
 pip install numpy
@@ -6,7 +6,7 @@ pip install pandas
 pip install gtts
 pip install sklearn
 
-rem pip install share
+# pip install share
 
 pip install lxml
 pip install pyaudio

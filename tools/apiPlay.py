@@ -19,22 +19,31 @@ class apiMusic:
         )[0][0]
 
         res = requests.get(f"{host}{searchMethod}{query}").text
+        link = res[
+            res.index('<h3 class="item-heading"><a href="')
+            + len('<h3 class="item-heading"><a href="') : res.index(' class="rt_arw " ')
+            - 1
+        ]
         if openLink:
-            webbrowser.open_new_tab(
-                res[
-                    res.index('<h3 class="item-heading"><a href="')
-                    + len('<h3 class="item-heading"><a href="') : res.index(
-                        ' class="rt_arw " '
-                    )
-                    - 1
-                ]
-            )
+            webbrowser.open_new_tab(link)
+
+        return link
 
     def spotify(query, openLink=True):
-        syn.speak("Spotify is not available at present, please try after future updates")
+        syn.speak(
+            "Spotify is not available at the moment, please try after future updates"
+        )
+
+    def youtubeMusic(query, openLink=True, rand=False):
+        link = apiVideo.youtube(query, openLink=False, rand=rand)
+        link = link.replace("https://youtube.com", "https://music.youtube.com")
+        if openLink:
+            webbrowser.open_new_tab(link)
+        return link
+
 
 class apiVideo:
-    def youtube(self, query, rand=False):
+    def youtube(query, openLink=True, rand=False):
         host, searchMethod, playMethod = sqlite.execute(
             databPath=dbServices,
             command=f"SELECT host, searchMethod, playMethod FROM VIDEO_SERVICES WHERE name='YouTube'",
@@ -60,7 +69,10 @@ class apiVideo:
                 link = f"{host}{random.choice(vids)}"
             else:
                 link = f"{host}{vids[0]}"
+            print(link)
+            if openLink:
+                webbrowser.open_new_tab(link)
 
-            webbrowser.open_new_tab(link)
+            return link
         except Exception:
             pass
