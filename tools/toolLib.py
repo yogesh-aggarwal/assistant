@@ -645,19 +645,20 @@ class Analyse:
 
         services = {
             # Video services
-            "youtube": apiVideo.youtube,
+            "youtube": apiVideo().youtube,
             # Music services
-            "gaana": apiMusic.gaana,
-            "spotify": apiMusic.spotify,
-            "youtubeMusic": apiMusic.youtubeMusic,
+            "gaana": apiMusic().gaana,
+            "spotify": apiMusic().spotify,
+            "youtubeMusic": apiMusic().youtubeMusic,
         }
 
         try:
             services[service](query)
-        except Exception:
+        except Exception as e:
+            print(e)
             if service is not None:
                 syn.speak(f"{service} is not supported yet, I am opening it on YouTube")
-            apiVideo().youtube(query, openLink=True)
+            services["youtube"](query, openLink=True)
             syn.speak(random.choice(greetKeywords))
 
 
