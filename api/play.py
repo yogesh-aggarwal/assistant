@@ -18,13 +18,13 @@ class apiMusic:
         )[0][0]
 
         res = requests.get(f"{host}{searchMethod}{query}").text
-        try:
-            with open("h.html", "w") as f:
-                f.write(res)
 
+        try:
             link = res[
                 res.index('<h3 class="item-heading"><a href="')
-                + len('<h3 class="item-heading"><a href="') : res.index(' class="rt_arw " ')
+                + len('<h3 class="item-heading"><a href="') : res.index(
+                    ' class="rt_arw " '
+                )
                 - 1
             ]
         except Exception:
