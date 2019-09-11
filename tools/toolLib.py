@@ -19,8 +19,13 @@ from sql_tools import sqlite
 from . import behaviour as bh
 from . import synthesis as syn
 from exception import QueryError
-from .constants import (dbAttributes, dbProgramInstallData, dbServices,
-                        greetKeywords, webDomains)
+from .constants import (
+    dbAttributes,
+    dbProgramInstallData,
+    dbServices,
+    greetKeywords,
+    webDomains,
+)
 
 
 class Web:
@@ -447,7 +452,7 @@ class Analyse:
 
         # Testing query
         elif "test" in query:
-            bot.init()
+            query = query.replace("test", "", 1).lower().strip()
 
         # Not understood
         else:
@@ -462,31 +467,36 @@ class Analyse:
         if self.platform == "windows":
             # Try whether the application is present on machine or not.
             try:
-                query = query.lower().capitalize()
+                query = query.lower().strip().capitalize()
                 # Getting the location of the program
-                try:
-                    location = sqlite.execute(
-                        databPath=dbProgramInstallData,
-                        command=f'SELECT location FROM PROGRAMS_DATA WHERE name="{query}"',
-                        matrix=False,
-                    )[0][0][0]
-                except Exception:
-                    location = ""
-
-                try:
-                    if location != "":
-                        applicationName = sqlite.execute(
+                ls = (
+                    "name",
+                    "shortName1",
+                    "shortName2",
+                    "shortName3",
+                    "shortName4",
+                    "shortName5",
+                )
+                opened = False
+                for i in ls:
+                    try:
+                        applicationName, location, locationMethod, openMethod = sqlite.execute(
                             databPath=dbProgramInstallData,
-                            command=f'SELECT fileName FROM PROGRAMS_DATA WHERE name="{query}"',
-                        )[0][0][0]
-                        locationMethod = sqlite.execute(
-                            databPath=dbProgramInstallData,
-                            command=f'SELECT locationMethod FROM PROGRAMS_DATA WHERE name="{query}"',
-                        )[0][0][0]
-                        openMethod = sqlite.execute(
-                            databPath=dbProgramInstallData,
-                            command=f'SELECT openMethod FROM PROGRAMS_DATA WHERE name="{query}"',
-                        )[0][0][0]
+                            command=f'SELECT fileName, location, locationMethod, openMethod FROM PROGRAMS_DATA_WIN32 WHERE {i}="{query}"',
+                            raiseError=False,
+                            matrix=False,
+                        )[
+                            0
+                        ][
+                            0
+                        ]
+                        if (
+                            not applicationName
+                            or not location
+                            or not locationMethod
+                            or not openMethod
+                        ):
+                            continue
 
                         if locationMethod == "user":
                             # Application is dependent of user home path
@@ -497,8 +507,9 @@ class Analyse:
                                 )
                                 syn.speak(random.choice(greetKeywords))
                             else:
-                                # Application is of system
+                                # Application will open with system command
                                 os.system(applicationName)
+
                         else:
                             # Application is independent of user home path
                             if openMethod == "exe":
@@ -506,69 +517,19 @@ class Analyse:
                                 os.startfile(f"{location}\\{applicationName}")
                                 syn.speak(random.choice(greetKeywords))
                             else:
-                                # Application is of system
+                                # Application will open with system command
                                 os.system(applicationName)
-                    else:
-                        # Checking for short names
-                        for shortNameCount in range(1, 7):
-                            # Getting location
-                            try:
-                                location = sqlite.execute(
-                                    databPath=dbProgramInstallData,
-                                    command=f'SELECT location FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
-                                )[0][0][0]
-                            except Exception:
-                                location = ""
 
-                            if location != "":
-                                applicationName = sqlite.execute(
-                                    databPath=dbProgramInstallData,
-                                    command=f'SELECT fileName FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
-                                )[0][0][0]
-                                locationMethod = sqlite.execute(
-                                    databPath=dbProgramInstallData,
-                                    command=f'SELECT locationMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
-                                )[0][0][0]
-                                openMethod = sqlite.execute(
-                                    databPath=dbProgramInstallData,
-                                    command=f'SELECT openMethod FROM PROGRAMS_DATA WHERE shortName{shortNameCount}="{query}"',
-                                )[0][0][0]
+                        opened = True
+                        break
 
-                                # Check whether the program opens according user home path
-                                if locationMethod == "user":
-                                    if openMethod == "exe":
-                                        # Application is executable
-                                        os.startfile(
-                                            f"{Tools().getUserPath}\\{location}\\{applicationName}"
-                                        )
-                                        syn.speak(random.choice(greetKeywords))
-                                        break
-                                    else:
-                                        # Application is of system
-                                        os.system(applicationName)
-                                        break
-                                    break
-                                else:
-                                    # Independent of user home path
-                                    if openMethod == "exe":
-                                        # Application is executable
-                                        os.startfile(f"{location}\\{applicationName}")
-                                        syn.speak(random.choice(greetKeywords))
-                                        break
-                                    else:
-                                        # Application is of system
-                                        os.system(applicationName)
-                                        break
-                                    break
-                            else:
-                                if shortNameCount == 6:
-                                    # Everything has been tried & application not found
-                                    raise FileNotFoundError(
-                                        "Application doesn't exists"
-                                    )
-                except Exception as e:
-                    if str(e) != "index 0 is out of bounds for axis 0 with size 0":
-                        raise FileNotFoundError("Application doesn't exists")
+                    except Exception as e:
+                        if str(e) != "index 0 is out of bounds for axis 0 with size 0":
+                            raise FileNotFoundError("Application doesn't exists")
+
+                if not opened:
+                    raise FileNotFoundError
+
             # Checking for webpage
             except Exception:
                 if Tools().reOperation(query, "webpage", "at start"):
@@ -577,28 +538,6 @@ class Analyse:
                             print("Open webpage")
                     else:
                         print("Webpage does not exists")
-
-                elif Tools().reOperation(query, "my", "at start"):
-                    query = query.replace("my", "", 1)
-                    if "folder" in query:
-                        query = query.replace("folder", "").replace(" ", "", 1)
-                        # Add the user path to the folder name.
-                        os.startfile(f"{os.path.expanduser('~')}\\{query}")
-
-                    elif "favourate" in query:
-                        query.replace("favourate", "")
-                        if "video" in query:
-                            # Get the file from the sql database.
-                            file = r"test\files\video\vid_1.mp4"
-                            os.startfile(file)
-                        elif "music" or "song" in query:
-                            # Get the file from the sql database.
-                            file = r"test\files\music\mus_1.mp3"
-                            os.startfile(file)
-                        elif "image" or "photo" in query:
-                            # Get the file from the sql database.
-                            file = r"test\files\image\img_1.jpg"
-                            os.startfile(file)
 
                 else:
                     query = (
@@ -612,6 +551,36 @@ class Analyse:
                         webbrowser.open_new_tab("https://" + query + domain)
                     else:
                         syn.speak("You don't have internet connection")
+
+        elif self.platform == "linux":
+            query = query.lower().strip().capitalize()
+            ls = (
+                "name",
+                "shortName1",
+                "shortName2",
+                "shortName3",
+                "shortName4",
+                "shortName5",
+            )
+
+            data = None
+            for i in ls:
+                result = sqlite.execute(
+                    f"SELECT command FROM PROGRAMS_DATA_LINUX WHERE {i}='{query.capitalize()}'",
+                    databPath="data/database/programInstallData.db",
+                    raiseError=False,
+                    matrix=True,
+                )
+                if result:
+                    data = result
+                    del result
+                    break
+
+            if data:
+                command = data[0][0][0]
+                os.system(command)
+            else:
+                syn.speak("The program you have demanded is not found on your device")
 
         else:
             syn.speak(
@@ -657,12 +626,16 @@ class Analyse:
             services[service](query)
         except QueryError:
             if service is not None:
-                syn.speak(f"No result found for your query so I am opening it on YouTube")
+                syn.speak(
+                    f"No result found for your query so I am opening it on YouTube"
+                )
             services["youtube"](query, openLink=True)
             syn.speak(random.choice(greetKeywords))
         except Exception:
             if service is not None:
-                syn.speak(f"{service} is not supported yet so I am opening it on YouTube")
+                syn.speak(
+                    f"{service} is not supported yet so I am opening it on YouTube"
+                )
             services["youtube"](query, openLink=True)
             syn.speak(random.choice(greetKeywords))
 
