@@ -18,6 +18,7 @@ from sql_tools import sqlite
 
 from . import behaviour as bh
 from . import synthesis as syn
+from exception import QueryError
 from .constants import (dbAttributes, dbProgramInstallData, dbServices,
                         greetKeywords, webDomains)
 
@@ -458,7 +459,7 @@ class Analyse:
         """
         Classifies the query containing "open" keyword.
         """
-        if self.platform == "Windows":
+        if self.platform == "windows":
             # Try whether the application is present on machine or not.
             try:
                 query = query.lower().capitalize()
@@ -654,9 +655,14 @@ class Analyse:
 
         try:
             services[service](query)
+        except QueryError:
+            if service is not None:
+                syn.speak(f"No result found for your query so I am opening it on YouTube")
+            services["youtube"](query, openLink=True)
+            syn.speak(random.choice(greetKeywords))
         except Exception:
             if service is not None:
-                syn.speak(f"{service} is not supported yet, I am opening it on YouTube")
+                syn.speak(f"{service} is not supported yet so I am opening it on YouTube")
             services["youtube"](query, openLink=True)
             syn.speak(random.choice(greetKeywords))
 

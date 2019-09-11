@@ -7,6 +7,7 @@ import requests
 from sql_tools import sqlite
 from tools import synthesis as syn
 from tools.constants import dbServices
+from exception import QueryError
 
 
 class apiMusic:
@@ -17,11 +18,22 @@ class apiMusic:
         )[0][0]
 
         res = requests.get(f"{host}{searchMethod}{query}").text
-        link = res[
-            res.index('<h3 class="item-heading"><a href="')
-            + len('<h3 class="item-heading"><a href="') : res.index(' class="rt_arw " ')
-            - 1
-        ]
+        try:
+            with open("h.html", "w") as f:
+                f.write(res)
+
+            link = res[
+                res.index('<h3 class="item-heading"><a href="')
+                + len('<h3 class="item-heading"><a href="') : res.index(' class="rt_arw " ')
+                - 1
+            ]
+        except Exception:
+            try:
+                res.index(" No results found for “")
+                raise QueryError
+            except Exception:
+                raise QueryError
+
         if openLink:
             webbrowser.open_new_tab(link)
 
@@ -33,7 +45,7 @@ class apiMusic:
         )
 
     def youtubeMusic(self, query, openLink=True, rand=False):
-        link = apiVideo.youtube(query, openLink=False, rand=rand)
+        link = apiVideo().youtube(query, openLink=False, rand=rand)
         link = link.replace("https://youtube.com", "https://music.youtube.com")
         if openLink:
             webbrowser.open_new_tab(link)
