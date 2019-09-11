@@ -13,6 +13,7 @@ def listen():
         print("\nListening...")
         r.pause_threshold = 1
         r.energy_threshold = 100
+        r.adjust_for_ambient_noise(source, duration = 1)
         audio = r.listen(source)
 
     query = None

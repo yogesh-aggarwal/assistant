@@ -11,8 +11,11 @@ DROP TABLE IF EXISTS PROGRAMS_DATA_WIN32;
 CREATE TABLE PROGRAMS_DATA_WIN32(name TEXT PRIMARY KEY, shortName1 TEXT DEFAULT '===', shortName2 TEXT DEFAULT '===', shortName3 TEXT DEFAULT '===', shortName4 TEXT DEFAULT '===', shortName5 TEXT DEFAULT '===', location TEXT, fileName TEXT, locationMethod Text, category TEXT, openMethod TEXT);
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- DEV APPS --
-INSERT INTO PROGRAMS_DATA_WIN32 VALUES ("Visual studio code", "Vs code", "Code studio", "===", "===", "===", "\AppData\Local\Programs\Microsoft VS Code", "code.exe", "user", "dev", "exe");
-INSERT INTO PROGRAMS_DATA_WIN32 VALUES ("Google chrome", "Chrome", "Chrome browser", "Browser", "===", "===", "C:\Program Files (x86)\Google\Chrome\Application", "chrome.exe", "self", "dev", "exe");
+INSERT INTO PROGRAMS_DATA_WIN32 VALUES ("Visual studio code", "Vs code", "Code studio", "Microsoft vs code", "Ms vs code", "Microsoft visual studio code", "\AppData\Local\Programs\Microsoft VS Code", "code.exe", "user", "dev", "exe");
+
+
+-- GENERAL PURPOSE --
+INSERT INTO PROGRAMS_DATA_WIN32 VALUES ("Google chrome", "Chrome", "Chrome browser", "Browser", "Google chrome browser", "===", "C:\Program Files (x86)\Google\Chrome\Application", "chrome.exe", "self", "general_purpose", "exe");
 
 
 -- OFFICE APPLICATIONS --
@@ -58,8 +61,30 @@ INSERT INTO PROGRAMS_DATA_WIN32 VALUES ("Media player", "Windows media player", 
 DROP TABLE IF EXISTS PROGRAMS_DATA_LINUX;
 CREATE TABLE PROGRAMS_DATA_LINUX (name TEXT PRIMARY KEY, shortName1 TEXT DEFAULT '===', shortName2 TEXT DEFAULT '===', shortName3 TEXT DEFAULT '===', shortName4 TEXT DEFAULT '===', shortName5 TEXT DEFAULT '===', command TEXT, category TEXT);
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- DEV --
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Visual studio code", "Vs code", "Code studio", "Microsoft vs code", "Ms vs code", "Microsoft visual studio code", "code", "dev");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Pycharm", "Python studio", "Python editor", "Jetbrains pycharm", "Intel ij pycharm", "===", "code", "dev");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Atom", "Atom editor", "Atom code editor", "Code editor", "Atom code editor", "===", "atom", "dev");
+
+
 -- SYSTEM APPS --
 INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Calculator", "Calc", "Calculations", "Calculation", "===", "===", "gnome-calculator", "sys");
-INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Terminal", "Shell", "Command prompt", "Command line", "Command stream", "Gnome-terminal", "gnome-terminal", "sys");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Calendar", "Dates", "Date view", "Events", "Data manager", "Event manager", "gnome-calendar", "sys");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Terminal", "Shell", "Command prompt", "Command line", "Command stream", "Gnome terminal", "gnome-terminal", "sys");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Explorer", "Gnome explorer", "File manager", "File explorer", "===", "===", "xdg-open ~", "sys");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("App store", "Gnome store", "App market", "Software", "Gnome software", "Gnome software market", "gnome-software", "sys");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Settings", "Gnome settings", "Gnome system settings", "System settings", "System management", "System manager", "gnome-control-center", "sys");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Photos", "Shotwell", "Photo view", "Shotwell viewer", "Shotwell image viewer", "Image viewer", "shotwell", "sys");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Vlc", "Video player", "Vlc video player", "Vlc player", "Player", "Vlc media player", "vlc", "sys");
 
--- INSERT INTO PROGRAMS_DATA_WIN32 VALUES ("", "", "", "", "", "", "", "");
+
+-- GENERAL PURPOSE --
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Disk manager", "Disk management", "Gparted", "Gparted disk manager", "Storage management", "Storage management", "gparted", "general_purpose");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Mozila firefox", "Firefox", "Mozila", "Mozila browser", "Firefox browser", "===", "firefox", "general_purpose");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Chrome", "Google chrome", "Chrome browser", "Google chrome browser", "===", "===", "google-chrome", "general_purpose");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Opera", "Opera browser", "===", "===", "===", "===", "opera", "general_purpose");
+INSERT INTO PROGRAMS_DATA_LINUX VALUES ("Browser", "Internet access", "===", "===", "===", "===", "gnome-www-browser", "general_purpose");
+
+-- INSERT INTO PROGRAMS_DATA_LINUX VALUES ("", "", "", "", "", "", "", "");
+
+----------------------
