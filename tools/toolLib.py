@@ -119,14 +119,7 @@ class Web:
         If there is connection return problem return "err_no_connection", else return True or False.
         """
         for domain in webDomains:
-            domain = domain[0]
-            if Tools().reOperation(query, domain, "at end"):
-                if Web().checkWebExists(query=query + domain) == True:
-                    return domain
-                elif Web().checkWebExists(query=query + domain) == False:
-                    return False
-                else:
-                    return False
+            return domain if Web().checkWebExists(query=f"{query}{domain}") else False
         else:
             return False
 
@@ -453,6 +446,7 @@ class Analyse:
         # Testing query
         elif "test" in query:
             query = query.replace("test", "", 1).lower().strip()
+            self.openClassify(query.replace("open", "", 1))
 
         # Not understood
         else:
@@ -476,20 +470,21 @@ class Analyse:
                     "shortName3",
                     "shortName4",
                     "shortName5",
+                    "shortName6",
+                    "shortName7",
+                    "shortName8",
+                    "shortName9",
                 )
                 opened = False
-                for i in ls:
+                for count, i in enumerate(ls):
                     try:
                         applicationName, location, locationMethod, openMethod = sqlite.execute(
                             databPath=dbProgramInstallData,
                             command=f'SELECT fileName, location, locationMethod, openMethod FROM PROGRAMS_DATA_WIN32 WHERE {i}="{query}"',
                             raiseError=False,
                             matrix=False,
-                        )[
-                            0
-                        ][
-                            0
-                        ]
+                        )[0][0]
+
                         if (
                             not applicationName
                             or not location
@@ -524,15 +519,16 @@ class Analyse:
                         break
 
                     except Exception as e:
-                        if str(e) != "index 0 is out of bounds for axis 0 with size 0":
-                            raise FileNotFoundError("Application doesn't exists")
+                        if count == len(ls) - 1:
+                            if str(e) != "index 0 is out of bounds for axis 0 with size 0":
+                                raise FileNotFoundError("Application doesn't exists")
 
                 if not opened:
                     raise FileNotFoundError
 
             # Checking for webpage
             except Exception:
-                if Tools().reOperation(query, "webpage", "at start"):
+                if Tools().reOperation(query, "Webpage", "at start"):
                     if Web(query).checkConnection():
                         if Web(query).checkWebExists():
                             print("Open webpage")

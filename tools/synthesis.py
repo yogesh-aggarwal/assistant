@@ -3,16 +3,22 @@ Synthesis extention for Jarvis AI project.
 """
 
 # import os
-
+import pyttsx3
 import speech_recognition as sr
+import platform
+
+
+engine = pyttsx3.init('sapi5')
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[1].id)
 
 
 def listen():
     r = sr.Recognizer()
+    r.pause_threshold = 1
+    r.energy_threshold = 100
     with sr.Microphone() as source:
         print("\nListening...")
-        r.pause_threshold = 1
-        r.energy_threshold = 100
         r.adjust_for_ambient_noise(source, duration = 1)
         audio = r.listen(source)
 
@@ -35,5 +41,11 @@ def speak(s):
     """
     Speaks the string provided.
     """
-    # os.system(f"espeak '{s}'")
-    print(s)
+    if platform.system() == "Windows":
+        engine.say(s)
+        engine.runAndWait()
+    elif platform.system() == "Linux":
+        print(s)
+        # os.system(f"espeak '{s}'")
+    else:
+        print("Platform not supported")

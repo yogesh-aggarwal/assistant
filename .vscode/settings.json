@@ -22,5 +22,6 @@
     "files.associations": {
         "stdexcept": "cpp",
         "iostream": "cpp"
-    }
+    },
+    "python.pythonPath": "C:\\Users\\Yogesh Aggarwal\\AppData\\Local\\Programs\\Python\\Python37\\python.exe"
 }
