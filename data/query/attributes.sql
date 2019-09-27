@@ -26,5 +26,4 @@ CREATE TABLE USER_ATTRIBUTES(name TEXT, value TEXT);
 
 INSERT INTO USER_ATTRIBUTES VALUES("videoDirectory", "D:\Videos\Music Videos");
 INSERT INTO USER_ATTRIBUTES VALUES("musicDirectory", "D:\Music\All time Music");
-
 ----------------------

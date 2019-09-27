@@ -20,8 +20,13 @@ from sql_tools import sqlite
 
 from . import behaviour as bh
 from . import synthesis as syn
-from .constants import (dbAttributes, dbProgramInstallData, dbServices,
-                        greetKeywords, webDomains)
+from .constants import (
+    dbAttributes,
+    dbProgramInstallData,
+    dbServices,
+    greetKeywords,
+    webDomains,
+)
 
 
 class Web:
@@ -34,12 +39,14 @@ class Web:
         self.__domain_presence = False
 
     @staticmethod
-    def checkConnection(web_page="google.com"):
+    def checkConnection(query="google.com"):
         """
         Checks whether there is internet connection available or not. Returns boolean value as per the outcome.
         """
+        query = query.replace("https://", "").replace("http://", "")
+
         try:
-            host = socket.gethostbyname(web_page)
+            host = socket.gethostbyname(query)
             s = socket.create_connection((host, 80), 2)
             s.close()
             return True
@@ -56,38 +63,19 @@ class Web:
         Not exists = False
         """
         exist = False
-        if not query:
-            query = self.query.replace("webpage ", "")
-
-        for domain in webDomains:
-            domain = domain[0]
-            if domain not in query:
-                self.__domain_presence = False
-            else:
-                self.__domain_presence = True
+        domainPresence = False
+        result = False
+        for dom in webDomains:
+            if dom in query:
+                domainPresence = True
+                del dom
                 break
 
         for domain in webDomains:
-            domain = domain[0]
-            if not self.__domain_presence:
-                try:
-                    if self.checkConnection(query + domain):
-                        query += domain
-                        self.__domain_presence = True
-                        exist = True
-                        break
-                    else:
-                        self.__domain_presence = False
-                except Exception:
-                    pass
-            else:
-                if self.checkConnection(query):
-                    exist = True
-                    break
-        if exist:
-            return True
-        else:
-            return False
+            domain = domain if not domainPresence else ""
+            result = True if self.checkConnection(f"{query}{domain}") else False
+
+        return result
 
     def findDomain(self, query=""):
         """
@@ -96,7 +84,11 @@ class Web:
         If there is connection return problem return "err_no_connection", else return True or False.
         """
         for domain in webDomains:
-            return domain if Web().checkWebExists(query=f"{query}{domain}") else False
+            result = domain if self.checkWebExists(query=f"{query}{domain}") else False
+            if not result:
+                continue
+            else:
+                return result
         else:
             return False
 
@@ -423,7 +415,7 @@ class Analyse:
         # Testing query
         elif "test" in query:
             query = query.replace("test", "", 1).lower().strip()
-            self.openClassify(query.replace("open", "", 1))
+            self.playClassify(query.replace("open", "", 1))
 
         # Not understood
         else:
@@ -460,7 +452,11 @@ class Analyse:
                             command=f'SELECT fileName, location, locationMethod, openMethod FROM PROGRAMS_DATA_WIN32 WHERE {i}="{query}"',
                             raiseError=False,
                             matrix=False,
-                        )[0][0]
+                        )[
+                            0
+                        ][
+                            0
+                        ]
 
                         if (
                             not applicationName
@@ -497,7 +493,10 @@ class Analyse:
 
                     except Exception as e:
                         if count == len(ls) - 1:
-                            if str(e) != "index 0 is out of bounds for axis 0 with size 0":
+                            if (
+                                str(e)
+                                != "index 0 is out of bounds for axis 0 with size 0"
+                            ):
                                 raise FileNotFoundError("Application doesn't exists")
 
                 if not opened:
@@ -520,8 +519,11 @@ class Analyse:
                         .replace(" ", "")
                     )
                     domain = Web().findDomain(query)
+                    for i in webDomains:
+                        query = query.replace(i, "")
+
                     if domain:
-                        webbrowser.open_new_tab("https://" + query + domain)
+                        webbrowser.open_new_tab(f"https://{query}{domain}")
                     else:
                         syn.speak("You don't have internet connection")
 
@@ -612,8 +614,18 @@ class Analyse:
                     )
                 services["youtube"](query, openLink=True)
                 syn.speak(random.choice(greetKeywords))
+
         else:
-            syn.speak("You don't have internet connection")
+            videoDir, musicDir = sqlite.execute(
+                "SELECT value FROM USER_ATTRIBUTES WHERE name IN ('musicDirectory', 'videoDirectory')",
+                databPath=dbAttributes,
+                splitByColumns=True,
+            )[0][0]
+            videoFiles = os.listdir(videoDir)
+            musicFiles = os.listdir(musicDir)
+
+            # TODO SEARCH HERE FOR MORE RELEVANT RESULTS
+            os.startfile(os.path.join(videoDir, random.choice(videoFiles)))
 
 
 class Question:
