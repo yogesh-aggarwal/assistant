@@ -7,25 +7,21 @@ An integrative library that contains the tools required to work the assistant.
 import os
 import random
 import re
+import socket
 import webbrowser
 
 import bs4
 import requests
 
-import chatbot as bot
+# import chatbot as bot
 from api.play import apiMusic, apiVideo
+from exception import QueryError
 from sql_tools import sqlite
 
 from . import behaviour as bh
 from . import synthesis as syn
-from exception import QueryError
-from .constants import (
-    dbAttributes,
-    dbProgramInstallData,
-    dbServices,
-    greetKeywords,
-    webDomains,
-)
+from .constants import (dbAttributes, dbProgramInstallData, dbServices,
+                        greetKeywords, webDomains)
 
 
 class Web:
@@ -38,34 +34,15 @@ class Web:
         self.__domain_presence = False
 
     @staticmethod
-    def checkConnection(web_page=""):
+    def checkConnection(web_page="google.com"):
         """
         Checks whether there is internet connection available or not. Returns boolean value as per the outcome.
         """
         try:
-            if web_page:
-                if "http://" in web_page:
-                    web_page = web_page.replace.replace("https://", "").replace(
-                        "http://", ""
-                    )
-                else:
-                    web_page = "http://" + web_page
-
-                request = requests.get(web_page)
-                if request.status_code == 200:
-                    return True
-                else:
-                    return False
-
-            else:
-                web_page = "https://google.com"
-                request = requests.get(web_page)
-                if request.status_code == 200:
-                    return True
-                else:
-                    return False
-
-            del web_page
+            host = socket.gethostbyname(web_page)
+            s = socket.create_connection((host, 80), 2)
+            s.close()
+            return True
         except Exception:
             return False
 
@@ -593,11 +570,10 @@ class Analyse:
 
         query = " ".join(wordList)
 
-        for i in [" on", " in", " at", " with"]:
-            try:
-                query = query.replace("youtube music", "youtubeMusic")
-            except Exception:
-                pass
+        try:
+            query = query.replace("youtube music", "youtubeMusic")
+        except Exception:
+            pass
 
         wordList = query.split(" ")
 
@@ -618,22 +594,26 @@ class Analyse:
             "youtubeMusic": apiMusic().youtubeMusic,
         }
 
-        try:
-            services[service](query)
-        except QueryError:
-            if service is not None:
-                syn.speak(
-                    f"No result found for your query so I am opening it on YouTube"
-                )
-            services["youtube"](query, openLink=True)
-            syn.speak(random.choice(greetKeywords))
-        except Exception:
-            if service is not None:
-                syn.speak(
-                    f"{service} is not supported yet so I am opening it on YouTube"
-                )
-            services["youtube"](query, openLink=True)
-            syn.speak(random.choice(greetKeywords))
+        # Redirecting to service
+        if Web().checkConnection():
+            try:
+                services[service](query)
+            except QueryError:
+                if service is not None:
+                    syn.speak(
+                        f"No result found for your query so I am opening it on YouTube"
+                    )
+                services["youtube"](query, openLink=True)
+                syn.speak(random.choice(greetKeywords))
+            except Exception:
+                if service is not None:
+                    syn.speak(
+                        f"{service} is not supported yet so I am opening it on YouTube"
+                    )
+                services["youtube"](query, openLink=True)
+                syn.speak(random.choice(greetKeywords))
+        else:
+            syn.speak("You don't have internet connection")
 
 
 class Question:
