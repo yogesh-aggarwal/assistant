@@ -1,3 +1,7 @@
+"""
+Play API for playing content for Jarvis AI project
+"""
+
 import random
 import webbrowser
 

@@ -15,7 +15,7 @@
     "python.testing.promptToConfigure": false,
     "python.linting.banditEnabled": false,
     "python.linting.pylintEnabled": false,
-    "python.linting.pep8Enabled": false,
+    "python.linting.pycodestyleEnabled": false,
     "python.linting.enabled": true,
     "python.linting.pylamaEnabled": true,
     "python.formatting.provider": "black",
