@@ -13,4 +13,5 @@ pathlib
 sql-tools
 tools-lib
 playsound
+newsapi-python
 opencv-python
