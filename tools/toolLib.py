@@ -20,6 +20,7 @@ from sql_tools import sqlite
 
 from . import behaviour as bh
 from . import synthesis as syn
+from api import search
 from .constants import (
     dbAttributes,
     dbProgramInstallData,
@@ -419,9 +420,11 @@ class Analyse:
 
         # Not understood
         else:
-            syn.speak(
-                "I am not able to understand your query at the moment. Please try after future updates."
-            )
+            result = Question().checkQuestion(query)
+            syn.speak(result) if result else syn.speak(search.Web().google(query))
+            # syn.speak(
+            #     "I am not able to understand your query at the moment. Please try after future updates."
+            # )
 
     def openClassify(self, query):
         """
@@ -654,6 +657,7 @@ class Question:
 
         self.quesType = self.quesType.lower()
 
+        __temp = False   # TODO Remove this line for searching questions related to assistant
         return __temp
 
     def analyse(self, query=""):
