@@ -437,7 +437,6 @@ class Analyse:
                         ][
                             0
                         ]
-
                         if (
                             not applicationName
                             or not location
@@ -471,7 +470,7 @@ class Analyse:
                         opened = True
                         break
 
-                    except Exception as e:
+                    except Exception:
                         if count == len(ls) - 1:
                             if (
                                 str(e)

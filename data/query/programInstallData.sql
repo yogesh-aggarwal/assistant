@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS PROGRAMS_DATA_WIN32;
 CREATE TABLE PROGRAMS_DATA_WIN32(name TEXT PRIMARY KEY, shortName1 TEXT DEFAULT '===', shortName2 TEXT DEFAULT '===', shortName3 TEXT DEFAULT '===', shortName4 TEXT DEFAULT '===', shortName5 TEXT DEFAULT '===', shortName6 TEXT DEFAULT '===', shortName7 TEXT DEFAULT '===', shortName8 TEXT DEFAULT '===',  shortName9 TEXT DEFAULT '===', location TEXT, fileName TEXT, locationMethod Text, category TEXT, openMethod TEXT);
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- DEV APPS --
-INSERT INTO PROGRAMS_DATA_WIN32 VALUES ("Visual studio code", "Vs code", "Code studio", "Microsoft vs code", "Ms vs code", "Microsoft visual studio code", "===", "===", "===", "===", "\AppData\Local\Programs\Microsoft VS Code", "code.exe", "user", "dev", "exe");
+INSERT INTO PROGRAMS_DATA_WIN32 VALUES ("Visual studio code", "Code", "Vs code", "Code studio", "Microsoft vs code", "Ms vs code", "Microsoft visual studio code", "===", "===", "===", "\AppData\Local\Programs\Microsoft VS Code", "code.exe", "user", "dev", "exe");
 
 
 -- GENERAL PURPOSE --

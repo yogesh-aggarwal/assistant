@@ -1,6 +1,7 @@
 pywin32
 numpy
 pandas
+colorama
 gtts
 sklearn
 lxml

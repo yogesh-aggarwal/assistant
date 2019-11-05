@@ -1,7 +1,8 @@
 from sql_tools import sqlite
 
 # sqlite.connect(r"data/database/services.db")
-sqlite.connect(r"data/database/history.db")
+# sqlite.connect(r"data/database/history.db")
+sqlite.connect(r"data/database/programInstallData.db")
 
 # result = sqlite.getTableNames()
 # result = sqlite.execute("SELECT * FROM engines")
@@ -11,8 +12,9 @@ sqlite.connect(r"data/database/history.db")
 # result = sqlite.execute("SELECT * FROM MUSIC_SERVICES")
 # result = sqlite.execute("INSERT INTO MUSIC_SERVICES VALUES ('YouTube music', 'https://music.youtube.com', '/search?q=', '/watch?v=', '3', 'bs4', 'RUN')")
 # result = sqlite.getColumnNames("engines")
-# result = sqlite.execute("SELECT * FROM history")
-result = sqlite.execute("SELECT * FROM history WHERE solved='false'")
+# result = sqlite.execute("SELECT * FROM PROGRAMS_DATA_WIN32")
+result = sqlite.execute("SELECT * FROM history")
+# result = sqlite.execute("SELECT * FROM history WHERE solved='false'")
 # result = sqlite.getNoOfRecords(["history", "history"])
 
 print(result)
