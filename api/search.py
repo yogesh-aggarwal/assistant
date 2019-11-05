@@ -6,9 +6,13 @@ import requests
 import bs4
 
 
-class Web:
+class Decide:
+    pass
+
+
+class Web(Decide):
     def __init__(self):
-        pass
+        super().__init__()
 
     def google(self, query):
         query = '+'.join(query.split(' '))
@@ -40,3 +44,8 @@ class Web:
             result = result[:result.find('Wikipedia')]
 
         return result
+    
+
+class Device(Decide):
+    def __init__(self):
+        super().__init__()

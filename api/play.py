@@ -55,7 +55,6 @@ class apiMusic:
             webbrowser.open_new_tab(link)
         return link
 
-
 class apiVideo:
     def youtube(self, query, openLink=True, rand=False):
         host, searchMethod, playMethod = sqlite.execute(

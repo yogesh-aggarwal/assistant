@@ -386,7 +386,6 @@ class Analyse:
         # Game
         elif "game" in query:
             import games
-
             games.init()
 
         # Exiting

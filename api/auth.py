@@ -2,17 +2,19 @@
 Authentication API for Jarvis API project.
 """
 
-import requests
+from . import web
 
 
 class Credentials:
-    pass
+    def __init__(self):
+        pass
 
 
 class Login(Credentials):
-    pass
+    def __init__(self):
+        super().__init__()
 
 
 class SignUp(Credentials):
-    pass
-
+    def __init__(self):
+        super().__init__()
