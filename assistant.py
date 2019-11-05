@@ -53,7 +53,7 @@ def main(method="voice", welcome=False, keep_asking=False):
                 analysis.parse()
 
                 if "test" not in query:
-                    solved = input("Solved: ")
+                    solved = input("Solved? ")
                     if not solved:
                         solved = "true"
                     else:

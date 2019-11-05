@@ -380,27 +380,8 @@ class Analyse:
             )[0][0][1]
         ):
             # SCRAP GOOGLE TO GET RESULTS
-            engine = "google"
-            searchMethod = Tools().getSearchMethod(engine)
-            link = "https://gaana.com/search/saaho"
-            link = f"https://{engine}.com{searchMethod}{query}"
-
-            headers = {
-                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
-            }
-            try:
-                res = requests.get(link, headers=headers).text
-                soup = bs4.BeautifulSoup(res, "lxml")
-
-                try:
-                    ans = soup.select(".Z0LcW")[0]
-                except Exception:
-                    syn.speak("No results found")
-                    exit()
-
-                syn.speak(f"{query} is {ans}")
-            except Exception:
-                syn.speak("You don't have internet connection")
+            result = Question().checkQuestion(query)
+            syn.speak(result) if result else syn.speak(search.Web().google(query))
 
         # Game
         elif "game" in query:
@@ -418,13 +399,11 @@ class Analyse:
             query = query.replace("test", "", 1).lower().strip()
             self.playClassify(query.replace("open", "", 1))
 
-        # Not understood
         else:
-            result = Question().checkQuestion(query)
-            syn.speak(result) if result else syn.speak(search.Web().google(query))
-            # syn.speak(
-            #     "I am not able to understand your query at the moment. Please try after future updates."
-            # )
+            # Not understood
+            syn.speak(
+                "I am not able to understand your query at the moment. Please try after future updates."
+            )
 
     def openClassify(self, query):
         """
