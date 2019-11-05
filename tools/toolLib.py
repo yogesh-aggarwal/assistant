@@ -10,17 +10,14 @@ import re
 import socket
 import webbrowser
 
-import bs4
-import requests
-
-# import chatbot as bot
-from api.play import apiMusic, apiVideo
-from exception import QueryError
 from sql_tools import sqlite
 
-from . import behaviour as bh
+from api import games, search
+from api.play import apiMusic, apiVideo
+from exception import QueryError
+from tools.behaviour import terminate
+
 from . import synthesis as syn
-from api import search
 from .constants import (
     dbAttributes,
     dbProgramInstallData,
@@ -344,18 +341,15 @@ class Analyse:
         # Open program
         if Tools().reOperation(query, "open", "at start"):
             self.openClassify(query.replace("open ", "", 1))
-            bh.init()
 
         # Play content
         elif Tools().reOperation(query, "play", "at start"):
             self.playClassify(query.replace("play ", ""))
-            bh.init()
 
         # Search content
         elif Tools().reOperation(query, "search", "at start"):
             var = Search()
             var.classify(query)
-            bh.init()
 
         # Open web
         elif Tools().reOperation(query, "go to", "at start"):
@@ -369,7 +363,7 @@ class Analyse:
             if domain != "err_no_connection":
                 if domain != "Webpage does not exists":
                     webbrowser.open_new_tab("https://" + query + domain)
-                    bh.init()
+
             else:
                 syn.speak("You don't have internet connection")
 
@@ -385,11 +379,11 @@ class Analyse:
 
         # Game
         elif "game" in query:
-            import games
             games.init()
 
         # Exiting
         elif query == "exit":
+            terminate()  # Terminating tracking session
             syn.speak("See you again.")
             quit(1)
 
@@ -428,7 +422,12 @@ class Analyse:
                 opened = False
                 for count, i in enumerate(ls):
                     try:
-                        applicationName, location, locationMethod, openMethod = sqlite.execute(
+                        (
+                            applicationName,
+                            location,
+                            locationMethod,
+                            openMethod,
+                        ) = sqlite.execute(
                             databPath=dbProgramInstallData,
                             command=f'SELECT fileName, location, locationMethod, openMethod FROM PROGRAMS_DATA_WIN32 WHERE {i}="{query}"',
                             raiseError=False,
@@ -635,7 +634,9 @@ class Question:
 
         self.quesType = self.quesType.lower()
 
-        __temp = False   # TODO Remove this line for searching questions related to assistant
+        __temp = (
+            False  # TODO Remove this line for searching questions related to assistant
+        )
         return __temp
 
     def analyse(self, query=""):

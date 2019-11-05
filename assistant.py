@@ -1,13 +1,20 @@
 """
-Jarvis AI project.
-    * Automates the tasks command by the user through speech.
-    * Uses connectivity to work properly.
+Jarvis AI project
 
-    Features-
-        1) Send E-Mails.
-        2) Plays music.
-        3) Opens location.
-        -- 4) Give terminal commands.
+Description:
+    Jarvis AI is the project opened for everyone to experience the power
+    of Artitfial Intelligence. This project is based on Python Programming
+    Language. To power machine learning & work properly, it uses internet
+    connection. This project is created keeping in mind that the end-user
+    should get a very nice experience & not face any problem in using it.
+
+    This project is open-source as of now. If anybody wants to contribute
+    to it, he/she is most welcome. Feel free to open any relevant issue
+    (in case of feedback) or pull request.
+
+    You can generalize your daily works with Jarvis Assistant Project.
+
+For more information read the docs...
 """
 
 import datetime
@@ -16,7 +23,7 @@ from tools import synthesis as syn
 
 from sql_tools import sqlite
 from tools_lib import bprint
-from tools.behaviour import terminate
+from tools.behaviour import init, terminate
 from tools.toolLib import Analyse
 
 
@@ -35,6 +42,33 @@ def wish():
     syn.speak("I am Jarvis! How can I help you?")
 
 
+def testing(q, t=False, e=False):
+    if t:
+        solved = input("Solved? ")
+        if not solved:
+            solved = "true"
+        else:
+            solved = "false"
+
+        sqlite.execute(
+            f"INSERT INTO HISTORY VALUES('{q}', '{solved}')",
+            databPath=r"data/database/history.db",
+        )
+    elif e:
+        sqlite.execute(
+            f"INSERT INTO HISTORY VALUES('{q}', 'false')",
+            databPath=r"data/database/history.db",
+        )
+        print(
+            sqlite.execute(
+                "SELECT * FROM HISTORY WHERE solved='false'",
+                databPath=r"data/database/history.db",
+            )[0]
+        )
+    
+    return True
+
+
 def main(method="voice", welcome=False, keep_asking=False):
     """
     Main block assistant assistant
@@ -48,43 +82,24 @@ def main(method="voice", welcome=False, keep_asking=False):
                 query = syn.listen()
             else:
                 query = input("Query: ")
+
+            init()  # Starting tracking session
+
             try:
                 analysis = Analyse(query, platform=platform.system())
                 analysis.parse()
-
-                if "test" not in query:
-                    solved = input("Solved? ")
-                    if not solved:
-                        solved = "true"
-                    else:
-                        solved = "false"
-
-                    sqlite.execute(
-                        f"INSERT INTO HISTORY VALUES('{query}', '{solved}')",
-                        databPath=r"data/database/history.db",
-                    )
+                # testing(query, t=True)
             except Exception as e:
-                if "test" not in query:
-                    sqlite.execute(
-                        f"INSERT INTO HISTORY VALUES('{query}', 'false')",
-                        databPath=r"data/database/history.db",
-                    )
-                    # print(sqlite.execute("SELECT * FROM HISTORY", databPath=r"data/database/history.db")[0])
-                    print(
-                        sqlite.execute(
-                            "SELECT * FROM HISTORY WHERE solved='false'",
-                            databPath=r"data/database/history.db",
-                        )[0]
-                    )
+                # testing(query, f=True)
                 raise e
 
-            terminate()
+            terminate()  # Terminating tracking session
+
             if not keep_asking:
                 break
-    except Exception as e:
-        bprint(e)
-        # syn.speak("\nBye! See you again")
+    except Exception:
+        syn.speak("\nBye! See you again")
 
 
 if __name__ == "__main__":
-    main(method="console", welcome=False, keep_asking=False)
+    main(method="console", welcome=False, keep_asking=True)
