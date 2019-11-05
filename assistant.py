@@ -20,15 +20,14 @@ For more information read the docs...
 import datetime
 import platform
 from tools import synthesis as syn
-from colorama import init
+from colorama import init as ansi
 
 from sql_tools import sqlite
-from tools_lib import bprint
 from tools.behaviour import init, terminate
 from tools.toolLib import Analyse
 
 
-init()
+ansi()
 
 
 def wish():
