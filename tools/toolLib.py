@@ -332,6 +332,10 @@ class Analyse:
         self.query = query
         self.classify()
 
+    @staticmethod
+    def test():
+        from api.calendar import Calendar
+
     def classify(self, webDomains=webDomains):
         """
         Classifies the string provided to different categories.

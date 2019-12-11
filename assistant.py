@@ -105,4 +105,5 @@ def main(method="voice", welcome=False, keep_asking=False):
 
 
 if __name__ == "__main__":
-    main(method="console", welcome=False, keep_asking=True)
+    # main(method="console", welcome=False, keep_asking=True)
+    Analyse.test()

@@ -23,5 +23,5 @@
         "stdexcept": "cpp",
         "iostream": "cpp"
     },
-    "python.pythonPath": "C:\\Users\\Yogesh Aggarwal\\AppData\\Local\\Programs\\Python\\Python37\\python.exe"
+    "python.pythonPath": "env\\Scripts\\python.exe"
 }
