@@ -2,17 +2,17 @@ import os
 import random
 import webbrowser
 
+from .mongo_client import win32_install_programs, linux_install_programs
 from api import chatbot, games, search
 from api.play import apiMusic, apiVideo
 
 from exception import QueryError
-from sql_tools import sqlite
 from tools.behaviour import terminate
-
+from sql_tools import sqlite
 from . import synthesis as syn
 from . import toolLib as tools_lib
 from . import web as web_tools
-from .constants import dbAttributes, dbProgramInstallData, greetKeywords, webDomains
+from .constants import dbAttributes, greetKeywords, webDomains
 
 Tools = tools_lib.Tools()
 Web = web_tools.Web()
@@ -105,11 +105,8 @@ class Analyse:
                 syn.speak("You don't have internet connection")
 
         # Other search for questions on Google
-        elif query.split(" ")[0].upper() in Tools.strTolst(
-            sqlite.execute(db=dbAttributes, command="SELECT * FROM KEYWORDS;").get[0][
-                0
-            ][0][1]
-        ):
+        # FIXME: Temporary, get the question keywords from database
+        elif query.split(" ")[0].upper() in ["What"]:
             # SCRAP GOOGLE TO GET RESULTS
             result = chatbot.Question().checkQuestion(query)
             syn.speak(result) if result else syn.speak(search.Web().google(query))
@@ -139,142 +136,55 @@ class Analyse:
         """
         Classifies the query containing "open" keyword.
         """
+        query = query.strip().capitalize()
         if self.platform == "windows":
-            # Try whether the application is present on machine or not.
-            try:
-                query = query.lower().strip().capitalize()
-                # Getting the location of the program
-                ls = (
-                    "name",
-                    "shortName1",
-                    "shortName2",
-                    "shortName3",
-                    "shortName4",
-                    "shortName5",
-                    "shortName6",
-                    "shortName7",
-                    "shortName8",
-                    "shortName9",
+            # Getting the program
+            properties = win32_install_programs.find_one({"names": query})
+            if not properties:
+                syn.speak(
+                    "Sorry to say your requested program is not found in my experience."
                 )
-                opened = False
-                for count, i in enumerate(ls):
-                    try:
-                        (
-                            applicationName,
-                            location,
-                            locationMethod,
-                            openMethod,
-                        ) = sqlite.execute(
-                            db=dbProgramInstallData,
-                            command=f'SELECT fileName, location, locationMethod, openMethod FROM PROGRAMS_DATA_WIN32 WHERE {i}="{query}"',
-                            err=False,
-                        ).get[
-                            0
-                        ][
-                            0
-                        ]
-                        if (
-                            not applicationName
-                            or not location
-                            or not locationMethod
-                            or not openMethod
-                        ):
-                            continue
+                return False
 
-                        if locationMethod == "user":
-                            # Application is dependent of user home path
-                            if openMethod == "exe":
-                                # Application is executable
-                                os.startfile(
-                                    f"{Tools.getUserPath}\\{location}\\{applicationName}"
-                                )
-                                syn.speak(random.choice(greetKeywords))
-                            else:
-                                # Application will open with system command
-                                os.system(applicationName)
+            OPEN_METHOD = properties["openMethod"]
+            FILE_NAME = properties["fileName"]
+            LOCATION_METHOD = properties["locationMethod"]
 
-                        else:
-                            # Application is independent of user home path
-                            if openMethod == "exe":
-                                # Application is executable
-                                os.startfile(f"{location}\\{applicationName}")
-                                syn.speak(random.choice(greetKeywords))
-                            else:
-                                # Application will open with system command
-                                os.system(applicationName)
-
-                        opened = True
-                        break
-
-                    except Exception as e:
-                        if count == len(ls) - 1:
-                            if (
-                                str(e)
-                                != "index 0 is out of bounds for axis 0 with size 0"
-                            ):
-                                raise FileNotFoundError("Application doesn't exists")
-
-                if not opened:
-                    raise FileNotFoundError
-
-            # Checking for webpage
-            except Exception:
-                if Tools.reOperation(query, "Webpage", "at start"):
-                    if Web(query).checkConnection():
-                        if Web(query).checkWebExists():
-                            print("Open webpage")
-                    else:
-                        print("Webpage does not exists")
-
+            if OPEN_METHOD == "exe":
+                # Extracting only if the program is opened by exe not command
+                LOCATION = properties["defaultInstallLocation"]
+                # Application is dependent of user home path
+                if LOCATION_METHOD == "user":
+                    # Application is executable
+                    os.startfile(f"{Tools.getUserPath}\\{LOCATION}\\{FILE_NAME}")
+                    syn.speak(random.choice(greetKeywords))
                 else:
-                    query = (
-                        query.replace("go to", "", 1)
-                        .replace("https://", "", 1)
-                        .replace("http://", "", 1)
-                        .replace(" ", "")
-                    )
-                    domain = Web.findDomain(query)
-                    for i in webDomains:
-                        query = query.replace(i, "")
+                    # Application is independent of user home path
+                    os.startfile(f"{LOCATION}\\{FILE_NAME}")
+                    syn.speak(random.choice(greetKeywords))
 
-                    if domain:
-                        webbrowser.open_new_tab(f"https://{query}{domain}")
-                    else:
-                        syn.speak("You don't have internet connection")
+            else:
+                # Application is executable
+                os.system(FILE_NAME)
 
         elif self.platform == "linux":
-            query = query.lower().strip().capitalize()
-            ls = (
-                "name",
-                "shortName1",
-                "shortName2",
-                "shortName3",
-                "shortName4",
-                "shortName5",
-            )
-
-            data = None
-            for i in ls:
-                result = sqlite.execute(
-                    f"SELECT command FROM PROGRAMS_DATA_LINUX WHERE {i}='{query.capitalize()}'",
-                    db="data/database/programInstallData.db",
-                    err=False,
-                ).get
-                if result:
-                    data = result
-                    del result
-                    break
-
-            if data:
-                command = data[0][0][0]
-                os.system(command)
-            else:
-                syn.speak("The program you have demanded is not found on your device")
+            # Getting the program
+            properties = linux_install_programs.find_one({"names": query})
+            if not properties:
+                syn.speak(
+                    "Sorry to say your requested program is not found in my experience."
+                )
+                return False
+            # Launching by command
+            os.system(properties["command"])
 
         else:
             syn.speak(
                 "The operating system is not supported for such type of operations"
             )
+            return False
+
+        return True
 
     @staticmethod
     def playClassify(query):
