@@ -1,5 +1,5 @@
 """
-Authentication API for Jarvis API project.
+Authentication API for Jycore API project.
 """
 
 from . import web

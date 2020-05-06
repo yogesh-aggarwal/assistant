@@ -1,5 +1,5 @@
 """
-Play API for playing content for Jarvis AI project
+Play API for playing content for Jycore AI project
 """
 
 import random
@@ -17,9 +17,9 @@ from exception import QueryError
 class apiMusic:
     def gaana(self, query, openLink=True):
         host, searchMethod = sqlite.execute(
-            databPath=dbServices,
+            db=dbServices,
             command=f"SELECT host, searchMethod FROM MUSIC_SERVICES WHERE RANK=1",
-        )[0][0]
+        ).get[0][0]
 
         res = requests.get(f"{host}{searchMethod}{query}").text
 
@@ -55,12 +55,13 @@ class apiMusic:
             webbrowser.open_new_tab(link)
         return link
 
+
 class apiVideo:
     def youtube(self, query, openLink=True, rand=False):
         host, searchMethod, playMethod = sqlite.execute(
-            databPath=dbServices,
+            db=dbServices,
             command=f"SELECT host, searchMethod, playMethod FROM VIDEO_SERVICES WHERE name='YouTube'",
-        )[0][0]
+        ).get[0][0][0]
 
         link = f"{host}{searchMethod}{query}"
 

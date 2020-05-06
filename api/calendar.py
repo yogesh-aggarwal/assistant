@@ -1,6 +1,7 @@
 """
-API for calender and date related operations for Jarvis AI project
+API for calender and date related operations for Jycore AI project
 """
+
 
 class Date:
     def __init__(self):

@@ -1,8 +1,8 @@
 """
-Jarvis AI project
+Jycore AI project
 
 Description:
-    Jarvis AI is the project opened for everyone to experience the power
+    Jycore AI is the project opened for everyone to experience the power
     of Artitfial Intelligence. This project is based on Python Programming
     Language. To power machine learning & work properly, it uses internet
     connection. This project is created keeping in mind that the end-user
@@ -12,7 +12,7 @@ Description:
     to it, he/she is most welcome. Feel free to open any relevant issue
     (in case of feedback) or pull request.
 
-    You can generalize your daily works with Jarvis Assistant Project.
+    You can generalize your daily works with Jycore Assistant Project.
 
 For more information read the docs...
 """
@@ -41,12 +41,12 @@ def wish():
         syn.speak("Good Afternoon!")
     else:
         syn.speak("Good Evening!")
-    # syn.speak("I am Jarvis! Chip number 227O4CB, Memory one Terabytes. How can I help you?")
-    syn.speak("I am Jarvis! How can I help you?")
+    # syn.speak("I am Jycore! Chip number 227O4CB, Memory one Terabytes. How can I help you?")
+    syn.speak("I am Jycore! How can I help you?")
 
 
-def testing(q, t=False, e=False):
-    if t:
+def askIfDesiredResult(q, ask=True):
+    if ask:
         solved = input("Solved? ")
         if not solved:
             solved = "true"
@@ -55,24 +55,24 @@ def testing(q, t=False, e=False):
 
         sqlite.execute(
             f"INSERT INTO HISTORY VALUES('{q}', '{solved}')",
-            databPath=r"data/database/history.db",
+            db=r"data/database/history.db",
         )
-    elif e:
+    else:
         sqlite.execute(
             f"INSERT INTO HISTORY VALUES('{q}', 'false')",
-            databPath=r"data/database/history.db",
+            db=r"data/database/history.db",
         )
         print(
             sqlite.execute(
                 "SELECT * FROM HISTORY WHERE solved='false'",
-                databPath=r"data/database/history.db",
-            )[0]
+                db=r"data/database/history.db",
+            ).get[0]
         )
-    
+
     return True
 
 
-def main(method="voice", welcome=False, keep_asking=False):
+def main(method="voice", welcome=False, keep_asking=False, test_query=""):
     """
     Main block assistant assistant
     """
@@ -84,26 +84,30 @@ def main(method="voice", welcome=False, keep_asking=False):
             if method == "voice":
                 query = syn.listen()
             else:
-                query = input("Query: ")
+                if not test_query:
+                    query = input("Query: ")
+                else:
+                    query = test_query
 
             init()  # Starting tracking session
 
             try:
                 analysis = Analyse(query, platform=platform.system())
                 analysis.parse()
-                # testing(query, t=True)
+                # askIfDesiredResult(query, t=True)
             except Exception as e:
-                # testing(query, f=True)
+                # askIfDesiredResult(query, f=True)
                 raise e
 
             terminate()  # Terminating tracking session
 
-            if not keep_asking:
+            if not keep_asking or test_query:
                 break
-    except Exception:
+    except Exception as e:
+        raise e
         syn.speak("\nBye! See you again")
 
 
 if __name__ == "__main__":
-    # main(method="console", welcome=False, keep_asking=True)
-    Analyse.test()
+    main(method="console", welcome=False, keep_asking=True, test_query="play slowly slowly")
+    # Analyse.test()

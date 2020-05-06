@@ -1,5 +1,5 @@
 """
-Extention for chatbot for Jarvis AI Project
+Extention for chatbot for Jycore AI Project
 """
 
 

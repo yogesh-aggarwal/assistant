@@ -1,5 +1,5 @@
 """
-Game extention for Jarvis AI Project
+Game extention for Jycore AI Project
 """
 
 choice = {

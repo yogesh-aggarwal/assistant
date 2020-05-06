@@ -1,6 +1,6 @@
 """
 Tasks API for helping user to compelete and keep track of the
-tasks as an entension of Jarvis AI project.
+tasks as an entension of Jycore AI project.
 """
 
 import io

@@ -1,5 +1,5 @@
 """
-Web API for Jarvis API project.
+Web API for Jycore API project.
 """
 
 import requests
@@ -13,7 +13,7 @@ class Web:
 class GET(Web):
     def __init__(self):
         super().__init__()
-    
+
     def request(self, url):
         res = requests.get(url)
         return res.text

@@ -23,5 +23,5 @@
         "stdexcept": "cpp",
         "iostream": "cpp"
     },
-    "python.pythonPath": "env\\Scripts\\python.exe"
+    "python.pythonPath": "C:\\Python\\Python38\\python.exe"
 }

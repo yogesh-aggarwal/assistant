@@ -1,13 +1,14 @@
 """
 An integrative library that contains the tools required to work the assistant.
     * Integrated with Assistant
-    * Inbuilt feature of Jarvis AI Poject.
+    * Inbuilt feature of Jycore AI Poject.
 """
+
+# TODO: Improve parsing algorithm
 
 import os
 import random
 import re
-import socket
 import webbrowser
 
 from sql_tools import sqlite
@@ -26,71 +27,6 @@ from .constants import (
     webDomains,
 )
 
-
-class Web:
-    """
-    Class that contains tools for the web operations.
-    """
-
-    def __init__(self, query=""):
-        self.query = query
-        self.__domain_presence = False
-
-    @staticmethod
-    def checkConnection(query="google.com"):
-        """
-        Checks whether there is internet connection available or not. Returns boolean value as per the outcome.
-        """
-        query = query.replace("https://", "").replace("http://", "")
-
-        try:
-            host = socket.gethostbyname(query)
-            s = socket.create_connection((host, 80), 2)
-            s.close()
-            return True
-        except Exception:
-            return False
-
-    def checkWebExists(self, query=""):
-        """
-        Checks the existance of the address provided.
-
-        If there is connection return problem return "err_no_connection", else return True or False.
-
-        Exists = True,
-        Not exists = False
-        """
-        exist = False
-        domainPresence = False
-        result = False
-        for dom in webDomains:
-            if dom in query:
-                domainPresence = True
-                del dom
-                break
-
-        for domain in webDomains:
-            domain = domain if not domainPresence else ""
-            result = True if self.checkConnection(f"{query}{domain}") else False
-
-        return result
-
-    def findDomain(self, query=""):
-        """
-        Finds the web domain of the name provided.
-
-        If there is connection return problem return "err_no_connection", else return True or False.
-        """
-        for domain in webDomains:
-            result = domain if self.checkWebExists(query=f"{query}{domain}") else False
-            if not result:
-                continue
-            else:
-                return result
-        else:
-            return False
-
-
 class Search:
     """
     Class that contains the search operation methods to perform various kinds of searching work efficiently.
@@ -105,14 +41,14 @@ class Search:
         """
         engines = sqlite.execute(
             "SELECT name FROM ENGINES",
-            databPath=dbServices,
-            matrix=False,
-            inlineData=True,
-            splitByColumns=True,
-        )[0][0]
+            db=dbServices,
+        ).get[0][0].T[0]
 
-        query = query.lower().replace("search", "", 1).strip()
-        wordList = query.split(" ")
+        print(engines)
+        # exit()
+
+        isSearchInQuery = True if "search" in query else False
+        wordList = query.lower().replace("search", "", 1).strip().split(" ")
         engine = None
 
         for i in range(len(wordList)):
@@ -121,6 +57,7 @@ class Search:
                     wordList.pop(0)
             except Exception:
                 pass
+        print(wordList)
 
         for __engine in engines:
             if (
@@ -148,7 +85,7 @@ class Search:
                         ].capitalize()  # The search engine is at the start
 
             elif (
-                wordList[-1].capitalize() == __engine
+                wordList[-1].capitalize() == __engine or isSearchInQuery
             ):  # Checking if the searching engine is not at start but at the last.
                 for __engine in engines:
                     if wordList[-2] in [
@@ -169,7 +106,7 @@ class Search:
             else:
                 queryType = "not_search"
 
-        if queryType == "Search":
+        if queryType == "search":
             try:
                 wordList.remove(engine.lower())
             except Exception:
@@ -195,6 +132,7 @@ class Search:
         engine = engine.lower()
         query = query.replace(engine, "", 1)
         method = Tools().getSearchMethod(engine)
+        print(f"https://{engine}.com{method}{query}")
         webbrowser.open_new_tab(f"https://{engine}.com{method}{query}")
 
 
@@ -213,16 +151,14 @@ class Tools:
         # Get methods from sql database and map them to dicts.
         try:
             return sqlite.execute(
-                databPath=dbServices,
+                db=dbServices,
                 command=f"SELECT METHOD FROM ENGINES WHERE NAME='{engine.capitalize()}'",
-                matrix=False,
-            )[0][0][0]
+            ).get[0][0][0][0]
         except Exception:
             return sqlite.execute(
-                databPath=dbServices,
+                db=dbServices,
                 command=f"SELECT METHOD FROM ENGINES WHERE NAME='Google'",
-                matrix=False,
-            )[0][0][0]
+            ).get[0][0][0][0]
 
     def reOperation(self, query, string, method):
         """
@@ -233,13 +169,15 @@ class Tools:
             __temp.append(string)
             string = __temp.copy()
             del __temp
+        else:
+            raise ValueError(f"[toolsLib.Tools.reOperation]: Query must be string, got {type(query)}")
 
         __temp = False
-        for count in range(len(string)):
+        for letter in string:
             if method == "at start":
-                patt = re.compile(rf"^{string[count]}")
+                patt = re.compile(rf"^{letter}")
             elif method == "at end":
-                patt = re.compile(rf"{string[count]}$")
+                patt = re.compile(rf"{letter}$")
 
             matches = patt.finditer(query)
             for match in matches:
@@ -248,12 +186,7 @@ class Tools:
                 else:
                     __temp = False
 
-        if __temp:
-            del __temp
-            return True
-        else:
-            del __temp
-            return False
+        return __temp
 
     @property
     def getUserPath(self):
@@ -300,7 +233,7 @@ class Analyse:
         query = self.query
 
         # For words at start
-        words = ("hey", "jarvis", "please", "can", "may", "you")
+        words = ("hey", "jycore", "please", "can", "may", "you")
         for word in words:
             if Tools().reOperation(query.lower(), word, "at start"):
                 query = query.lower().replace(word, "", 1).strip()
@@ -374,8 +307,8 @@ class Analyse:
         # Other search for questions on Google
         elif query.split(" ")[0].upper() in Tools.strTolst(
             sqlite.execute(
-                databPath=dbAttributes, command="SELECT * FROM KEYWORDS;", matrix=False
-            )[0][0][1]
+                db=dbAttributes, command="SELECT * FROM KEYWORDS;"
+            ).get[0][0][0][1]
         ):
             # SCRAP GOOGLE TO GET RESULTS
             result = Question().checkQuestion(query)
@@ -432,11 +365,10 @@ class Analyse:
                             locationMethod,
                             openMethod,
                         ) = sqlite.execute(
-                            databPath=dbProgramInstallData,
+                            db=dbProgramInstallData,
                             command=f'SELECT fileName, location, locationMethod, openMethod FROM PROGRAMS_DATA_WIN32 WHERE {i}="{query}"',
-                            raiseError=False,
-                            matrix=False,
-                        )[
+                            err=False,
+                        ).get[
                             0
                         ][
                             0
@@ -474,7 +406,7 @@ class Analyse:
                         opened = True
                         break
 
-                    except Exception:
+                    except Exception as e:
                         if count == len(ls) - 1:
                             if (
                                 str(e)
@@ -525,10 +457,9 @@ class Analyse:
             for i in ls:
                 result = sqlite.execute(
                     f"SELECT command FROM PROGRAMS_DATA_LINUX WHERE {i}='{query.capitalize()}'",
-                    databPath="data/database/programInstallData.db",
-                    raiseError=False,
-                    matrix=True,
-                )
+                    db="data/database/programInstallData.db",
+                    err=False,
+                ).get
                 if result:
                     data = result
                     del result
@@ -601,9 +532,8 @@ class Analyse:
         else:
             videoDir, musicDir = sqlite.execute(
                 "SELECT value FROM USER_ATTRIBUTES WHERE name IN ('musicDirectory', 'videoDirectory')",
-                databPath=dbAttributes,
-                splitByColumns=True,
-            )[0][0]
+                db=dbAttributes,
+            ).get.T[0][0]
             videoFiles = os.listdir(videoDir)
             musicFiles = os.listdir(musicDir)
 
@@ -622,8 +552,8 @@ class Question:
         __temp = False
         qWords = (
             sqlite.execute(
-                databPath=dbAttributes, command="SELECT * FROM KEYWORDS;", matrix=False
-            )[0][0][1]
+                db=dbAttributes, command="SELECT * FROM KEYWORDS;"
+            ).get[0][0][1]
             .replace("(", "", 1)
             .replace(")", "", 1)
             .split(", ")

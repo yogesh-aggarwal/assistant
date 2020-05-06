@@ -1,5 +1,5 @@
 """
-News API for Jarvis API project.
+News API for Jycore API project.
 """
 
 from newsapi import NewsApiClient

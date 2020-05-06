@@ -1,5 +1,5 @@
 """
-API for interaction & control between IoT devices through Jarvis
+API for interaction & control between IoT devices through Jycore
 """
 
 

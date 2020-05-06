@@ -1,5 +1,5 @@
 """
-Exception extention for Jarvis AI Project
+Exception extention for Jycore AI Project
 """
 
 
