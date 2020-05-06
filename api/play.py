@@ -32,7 +32,7 @@ def scrapeService(service, query, openLink=True):
         webbrowser.open_new_tab(link) if openLink else False
     except:
         raise QueryError(
-            "[api.play.apiMusic.gaana]: Connection error or Element not found (selenium)"
+            "[api.play.scrapeService]: Connection error or Element not found (selenium)"
         )
     webClient.__exit__()
 
