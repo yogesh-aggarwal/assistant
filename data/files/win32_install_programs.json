@@ -1,0 +1,186 @@
+[
+    {
+        "names": [
+            "Visual studio code",
+            "Code",
+            "Vs code",
+            "Code studio",
+            "Microsoft vs code",
+            "Ms vs code",
+            "Ms visual studio code",
+            "Microsoft visual studio code"
+        ],
+        "defaultInstallLocation": "\\AppData\\Local\\Programs\\Microsoft VS Code",
+        "fileName": "code.exe",
+        "locationMethod": "user",
+        "category": "dev",
+        "openMethod": "exe"
+    },
+    {
+        "names": [
+            "Google chrome",
+            "Chrome",
+            "Chrome browser",
+            "Browser",
+            "Google chrome browser"
+        ],
+        "defaultInstallLocation": "C:\\Program Files (x86)\\Google\\Chrome\\Application",
+        "fileName": "chrome.exe",
+        "locationMethod": "self",
+        "category": "general_purpose",
+        "openMethod": "exe"
+    },
+    {
+        "names": [
+            "Control panel"
+        ],
+        "defaultInstallLocation": "C:\\Windows\\System32",
+        "fileName": "control.exe",
+        "locationMethod": "self",
+        "category": "sys",
+        "openMethod": "exe"
+    },
+    {
+        "names": [
+            "Command prompt",
+            "Cmd",
+            "Command line",
+            "Terminal"
+        ],
+        "defaultInstallLocation": "C:\\Windows\\System32",
+        "fileName": "conhost.exe",
+        "locationMethod": "self",
+        "category": "sys",
+        "openMethod": "exe"
+    },
+    {
+        "names": [
+            "Explorer",
+            "Windows explorer",
+            "File manager",
+            "Microsoft explorer",
+            "Ms explorer",
+            "File explorer",
+            "Files"
+        ],
+        "defaultInstallLocation": "C:\\Windows",
+        "fileName": "explorer.exe",
+        "locationMethod": "self",
+        "category": "sys",
+        "openMethod": "exe"
+    },
+    {
+        "names": [
+            "Registry",
+            "Windows registry",
+            "Windows database"
+        ],
+        "defaultInstallLocation": "C:\\Windows",
+        "fileName": "regedit.exe",
+        "locationMethod": "self",
+        "category": "sys",
+        "openMethod": "exe"
+    },
+    {
+        "names": [
+            "Notepad",
+            "Windows notepad",
+            "Microsoft notepad",
+            "Ms notepad"
+        ],
+        "defaultInstallLocation": "C:\\Windows\\System32",
+        "fileName": "regedit.exe",
+        "locationMethod": "self",
+        "category": "sys",
+        "openMethod": "exe"
+    },
+    {
+        "names": [
+            "Music",
+            "Microsoft music",
+            "Ms music",
+            "Music player",
+            "Groove",
+            "Groove music"
+        ],
+        "fileName": "start mswindowsmusic:",
+        "locationMethod": "self",
+        "category": "sys",
+        "openMethod": "command"
+    },
+    {
+        "names": [
+            "Calculator",
+            "Microsoft calculator",
+            "Ms calculator"
+        ],
+        "fileName": "start ms-calculator:",
+        "locationMethod": "self",
+        "category": "sys",
+        "openMethod": "command"
+    },
+    {
+        "names": [
+            "Camera",
+            "Microsoft camera",
+            "Ms camera"
+        ],
+        "fileName": "start microsoft.windows.camera:",
+        "locationMethod": "self",
+        "category": "sys",
+        "openMethod": "command"
+    },
+    {
+        "names": [
+            "Alarms",
+            "Microsoft alarms",
+            "Ms alarms",
+            "Alarms and clock",
+            "Ms alarms and clock",
+            "Clock"
+        ],
+        "fileName": "start explorer.exe shell:AppsFolder\\Microsoft.WindowsAlarms_8wekyb3d8bbwe!App",
+        "locationMethod": "self",
+        "category": "sys",
+        "openMethod": "command"
+    },
+    {
+        "names": [
+            "Settings",
+            "Microsoft settings",
+            "Ms settings",
+            "System settings"
+        ],
+        "fileName": "start ms-settings:",
+        "locationMethod": "self",
+        "category": "sys",
+        "openMethod": "command"
+    },
+    {
+        "names": [
+            "Edge",
+            "Edge browser",
+            "Microsoft edge",
+            "Ms edge",
+            "Microsoft edge browser",
+            "Ms edge browser"
+        ],
+        "fileName": "start microsoft-edge:",
+        "locationMethod": "self",
+        "category": "sys",
+        "openMethod": "command"
+    },
+    {
+        "names": [
+            "Media player",
+            "Windows media player",
+            "Microsoft windows media player",
+            "Ms windows media player",
+            "Ms media player"
+        ],
+        "fileName": "start wmplayer.exe",
+        "locationMethod": "self",
+        "category": "sys",
+        "openMethod": "command"
+    }
+]

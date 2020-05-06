@@ -1,0 +1,18 @@
+[
+    {
+        "name": "YouTube",
+        "host": "youtube.com",
+        "isHttps": true,
+        "searchSlug": "/results?search_query=",
+        "playSlug": "/watch?v=",
+        "supported": false
+    },
+    {
+        "name": "Dailymotion",
+        "host": "dailymotion.com",
+        "isHttps": true,
+        "searchSlug": "/search/",
+        "playSlug": "/video/",
+        "supported": false
+    }
+]

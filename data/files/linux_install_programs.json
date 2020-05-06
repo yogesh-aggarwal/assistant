@@ -1,0 +1,189 @@
+[
+    {
+        "names": [
+            "Visual studio code",
+            "Vs code",
+            "Code studio",
+            "Microsoft vs code",
+            "Ms vs code",
+            "Microsoft visual studio code"
+        ],
+        "command": "code",
+        "category": "dev"
+    },
+    {
+        "names": [
+            "Pycharm",
+            "Python studio",
+            "Python editor",
+            "Jetbrains pycharm",
+            "Intel ij pycharm"
+        ],
+        "command": "charm",
+        "category": "dev"
+    },
+    {
+        "names": [
+            "Atom",
+            "Atom editor",
+            "Atom code editor",
+            "Code editor",
+            "Atom code editor"
+        ],
+        "command": "atom",
+        "category": "dev"
+    },
+    {
+        "names": [
+            "Calculator",
+            "Calc",
+            "Calculations",
+            "Calculation"
+        ],
+        "command": "gnome-calculator",
+        "category": "sys"
+    },
+    {
+        "names": [
+            "Calendar",
+            "Dates",
+            "Date view",
+            "Events",
+            "Data manager",
+            "Event manager"
+        ],
+        "command": "gnome-calendar",
+        "category": "sys"
+    },
+    {
+        "names": [
+            "Terminal",
+            "Shell",
+            "Command prompt",
+            "Command line",
+            "Command stream",
+            "Gnome terminal"
+        ],
+        "command": "gnome-terminal",
+        "category": "sys"
+    },
+    {
+        "names": [
+            "Explorer",
+            "Gnome explorer",
+            "File manager",
+            "File explorer"
+        ],
+        "command": "xdg-open ~",
+        "category": "sys"
+    },
+    {
+        "names": [
+            "App store",
+            "Gnome store",
+            "App market",
+            "Software",
+            "Gnome software",
+            "Gnome software market"
+        ],
+        "command": "gnome-software",
+        "category": "sys"
+    },
+    {
+        "names": [
+            "Settings",
+            "Gnome settings",
+            "Gnome system settings",
+            "System settings",
+            "System management",
+            "System manager"
+        ],
+        "command": "gnome-control-center",
+        "category": "sys"
+    },
+    {
+        "names": [
+            "Photos",
+            "Shotwell",
+            "Photo view",
+            "Shotwell viewer",
+            "Shotwell image viewer",
+            "Image viewer"
+        ],
+        "command": "shotwell",
+        "category": "sys"
+    },
+    {
+        "names": [
+            "Vlc",
+            "Video player",
+            "Vlc video player",
+            "Vlc player",
+            "Player",
+            "Vlc media player"
+        ],
+        "command": "vlc",
+        "category": "general_purpose"
+    },
+    {
+        "names": [
+            "Disk manager",
+            "Disk management",
+            "Gparted",
+            "Gparted disk manager",
+            "Storage management",
+            "Storage management"
+        ],
+        "command": "gparted",
+        "category": "general_purpose"
+    },
+    {
+        "names": [
+            "Mozila firefox",
+            "Firefox",
+            "Mozila",
+            "Mozila browser",
+            "Firefox browser"
+        ],
+        "command": "firefox",
+        "category": "general_purpose"
+    },
+    {
+        "names": [
+            "Chrome",
+            "Google chrome",
+            "Chrome browser",
+            "Google chrome browser"
+        ],
+        "command": "google-chrome",
+        "category": "general_purpose"
+    },
+    {
+        "names": [
+            "Opera",
+            "Opera browser"
+        ],
+        "command": "opera",
+        "category": "general_purpose"
+    },
+    {
+        "names": [
+            "Browser",
+            "Internet access"
+        ],
+        "command": "gnome-www-browser",
+        "category": "general_purpose"
+    },
+    {
+        "names": [
+            "Mail",
+            "Thunderbird mail",
+            "Thunderbird",
+            "Mailer",
+            "Mails",
+            "E-mails"
+        ],
+        "command": "thunderbird",
+        "category": "general_purpose"
+    }
+]

@@ -9,9 +9,15 @@ import bs4
 import requests
 
 from sql_tools import sqlite
+from pymongo import MongoClient
+
 from tools import synthesis as syn
 from tools.constants import dbServices
 from exception import QueryError
+from tools.constants import MongoURI
+
+
+mongoClient
 
 
 class apiMusic:
