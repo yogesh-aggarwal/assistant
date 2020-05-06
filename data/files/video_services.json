@@ -5,6 +5,7 @@
         "isHttps": true,
         "searchSlug": "/results?search_query=",
         "playSlug": "/watch?v=",
+        "xpath": "//*[@id=\"video-title\"]",
         "supported": false
     },
     {

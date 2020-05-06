@@ -12,4 +12,5 @@ greetKeywords = np.array(
 
 webDomains = [".com", ".org", ".in", ".edu", ".net", ".arpa"]
 
-MongoURI = "mongodb://localhost:27017/jycore"
+MongoURI = "mongodb://localhost:27017"
+dbName = "jycore"

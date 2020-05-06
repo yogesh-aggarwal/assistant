@@ -121,7 +121,7 @@ class Search:
         """
         engine = engine.lower()
         query = query.replace(engine, "", 1)
-        method = Tools().getSearchMethod(engine)
+        method = Tools().getsearchSlug(engine)
         print(f"https://{engine}.com{method}{query}")
         webbrowser.open_new_tab(f"https://{engine}.com{method}{query}")
 
@@ -134,7 +134,7 @@ class Tools:
     def __init__(self):
         pass
 
-    def getSearchMethod(self, engine=""):
+    def getsearchSlug(self, engine=""):
         """
         Returns the search method of the specified search engine from the database.
         """

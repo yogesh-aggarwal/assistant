@@ -1,53 +1,48 @@
 """
 Play API for playing content for Jycore AI project
 """
-
-import random
 import webbrowser
 
-import bs4
-import requests
-
-from sql_tools import sqlite
-from pymongo import MongoClient
-
-from tools import synthesis as syn
-from tools.constants import dbServices
 from exception import QueryError
-from tools.constants import MongoURI
+from tools import mongo_client
+from tools import synthesis as syn
+from tools import web
+
+# Web client
+webClient = web.Web.getWebClient()
+# Services
+musicServices = mongo_client.music_services
+videoServices = mongo_client.video_services
 
 
-mongoClient
+def scrapeService(service, query, openLink=True):
+    query = query.replace(" ", "+")
+
+    PROTOCOL = "https://" if service["isHttps"] else "http://"
+    HOST = service["host"]
+    SEARCH_SLUG = service["searchSlug"]
+    XPATH = service["xpath"]
+
+    webClient.get(f"{PROTOCOL}{HOST}{SEARCH_SLUG}{query}")
+
+    link = False
+
+    try:
+        link = webClient.find_element_by_xpath(XPATH).get_attribute("href")
+        webbrowser.open_new_tab(link) if openLink else False
+    except:
+        raise QueryError(
+            "[api.play.apiMusic.gaana]: Connection error or Element not found (selenium)"
+        )
+    webClient.__exit__()
+
+    return link
 
 
 class apiMusic:
     def gaana(self, query, openLink=True):
-        host, searchMethod = sqlite.execute(
-            db=dbServices,
-            command=f"SELECT host, searchMethod FROM MUSIC_SERVICES WHERE RANK=1",
-        ).get[0][0]
-
-        res = requests.get(f"{host}{searchMethod}{query}").text
-
-        try:
-            link = res[
-                res.index('<h3 class="item-heading"><a href="')
-                + len('<h3 class="item-heading"><a href="') : res.index(
-                    ' class="rt_arw " '
-                )
-                - 1
-            ]
-        except Exception:
-            try:
-                res.index(" No results found for “")
-                raise QueryError
-            except Exception:
-                raise QueryError
-
-        if openLink:
-            webbrowser.open_new_tab(link)
-
-        return link
+        service = musicServices.find_one({"name": "Gaana"})
+        scrapeService(service=service, query=query, openLink=True)
 
     def spotify(self, query, openLink=True):
         syn.speak(
@@ -55,44 +50,11 @@ class apiMusic:
         )
 
     def youtubeMusic(self, query, openLink=True, rand=False):
-        link = apiVideo().youtube(query, openLink=False, rand=rand)
-        link = link.replace("https://youtube.com", "https://music.youtube.com")
-        if openLink:
-            webbrowser.open_new_tab(link)
-        return link
+        service = musicServices.find_one({"name": "YouTube Music"})
+        scrapeService(service=service, query=query, openLink=True)
 
 
 class apiVideo:
     def youtube(self, query, openLink=True, rand=False):
-        host, searchMethod, playMethod = sqlite.execute(
-            db=dbServices,
-            command=f"SELECT host, searchMethod, playMethod FROM VIDEO_SERVICES WHERE name='YouTube'",
-        ).get[0][0][0]
-
-        link = f"{host}{searchMethod}{query}"
-
-        res = requests.get(f"{host}{searchMethod}{query}").text
-        soup = bs4.BeautifulSoup(res, "lxml")
-        links = []
-        for link in soup.find_all("a", href=True):
-            links.append(link["href"])
-
-        vids = []
-        for link in links:
-            if playMethod in link:
-                vids.append(link)
-                if not rand:
-                    break
-
-        try:
-            if rand:
-                link = f"{host}{random.choice(vids)}"
-            else:
-                link = f"{host}{vids[0]}"
-
-            if openLink:
-                webbrowser.open_new_tab(link)
-
-            return link
-        except Exception:
-            pass
+        service = videoServices.find_one({"name": "YouTube"})
+        scrapeService(service=service, query=query, openLink=True)

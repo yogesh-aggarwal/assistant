@@ -1,13 +1,10 @@
 from pymongo import MongoClient
+from .constants import MongoURI, dbName
 
-# from .constants import MongoURI
-MongoURI = "mongodb://localhost:27017"
-DB_NAME = "jycore"
+client = MongoClient(MongoURI)[dbName]
 
-
-client = MongoClient(MongoURI)[DB_NAME]
-
-install_programs = client["install_programs"]
-
-
-print(install_programs)
+win32_install_programs = client["win32_install_programs"]
+linux_install_programs = client["linux_install_programs"]
+search_engines = client["search_engines"]
+video_services = client["video_services"]
+music_services = client["music_services"]

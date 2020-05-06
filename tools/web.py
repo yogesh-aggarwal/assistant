@@ -1,5 +1,7 @@
 import socket
 
+from selenium import webdriver
+
 from .constants import webDomains
 
 
@@ -26,6 +28,15 @@ class Web:
             return True
         except Exception:
             return False
+
+    @staticmethod
+    def getWebClient():
+        webClientOptions = webdriver.ChromeOptions()
+        webClientOptions.add_argument("headless")
+        webClientOptions.add_argument("--log-level=3")
+        webClientOptions.add_experimental_option("excludeSwitches", ["enable-logging"])
+
+        return webdriver.Chrome(options=webClientOptions)
 
     def checkWebExists(self, query=""):
         """

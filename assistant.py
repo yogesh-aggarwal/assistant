@@ -111,4 +111,6 @@ def main(method="voice", welcome=False, keep_asking=False, test_query=""):
 if __name__ == "__main__":
     # main(method="console", welcome=False, keep_asking=True, test_query="play slowly slowly")
     # Analyse.test()
-    pass
+    from api import play
+    music = play.apiVideo()
+    music.youtube("physics wallah")

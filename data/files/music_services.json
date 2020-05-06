@@ -5,6 +5,7 @@
         "isHttps": true,
         "searchSlug": "/search/",
         "playSlug": "/song/",
+        "xpath": "//*[@id=\"new-release-album\"]/li[1]/div/div[1]/a",
         "supported": false
     },
     {
@@ -16,7 +17,7 @@
         "supported": false
     },
     {
-        "name": "Youtube Music",
+        "name": "YouTube Music",
         "host": "music.youtube.com",
         "isHttps": true,
         "searchSlug": "/results?search_query=",
