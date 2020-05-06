@@ -24,7 +24,7 @@ from colorama import init as ansi
 
 from sql_tools import sqlite
 from tools.behaviour import init, terminate
-from tools.toolLib import Analyse
+from tools.analyse import Analyse
 
 
 ansi()
