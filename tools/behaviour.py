@@ -12,5 +12,3 @@ def init():
 
 def terminate():
     bprint("-> Tracking stopped <-", bg="white", fg="red")
-
-init()
