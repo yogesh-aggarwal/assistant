@@ -1,8 +1,9 @@
-import socket
+import socket, webbrowser
 
 from selenium import webdriver
 
 from .constants import webDomains
+from .mongo_client import search_engines
 
 
 class Web:
@@ -28,6 +29,21 @@ class Web:
             return True
         except Exception:
             return False
+
+    def searchOnPreferedEngine(self, query, openLink=True) -> (bool, webdriver.Chrome):
+        engine = search_engines.find_one({"name": "Google"})
+        HOST = engine["host"]
+        PROTOCOL = "https" if engine["isHttps"] else "http"
+        SEARCH_SLUG = engine["querySlug"]
+        link = f"{PROTOCOL}://{HOST}{SEARCH_SLUG}{query}"
+
+        if openLink:
+            webbrowser.open_new_tab(link)
+            return True
+        else:
+            client = self.getWebClient()
+            client.get(link)
+            return client
 
     @staticmethod
     def getWebClient():

@@ -108,35 +108,26 @@ class Tools:
     def __init__(self):
         pass
 
-    def reOperation(self, query, string, method) -> bool:
+    def reOperation(self, query, strings, method) -> bool:
         """
         Performs some simple regular expressions operations on the specified query.
         """
-        if type(string) is str:
-            __temp = []
-            __temp.append(string)
-            string = __temp.copy()
-            del __temp
-        else:
-            raise ValueError(
-                f"[toolsLib.Tools.reOperation]: Query must be string, got {type(query)}"
-            )
+        if type(strings) is str:
+            strings = [strings]
 
-        __temp = False
-        for letter in string:
+        isMatchFound = False
+        for string in strings:
             if method == "at start":
-                patt = re.compile(rf"^{letter}")
+                patt = re.compile(rf"^{string}")
             elif method == "at end":
-                patt = re.compile(rf"{letter}$")
+                patt = re.compile(rf"{string}$")
 
             matches = patt.finditer(query)
-            for match in matches:
-                if match != None:
-                    __temp = True
-                else:
-                    __temp = False
+            if len(tuple(matches)) > 0:
+                isMatchFound = True
+                break
 
-        return __temp
+        return isMatchFound
 
     @property
     def getUserPath(self) -> str:

@@ -113,6 +113,6 @@ if __name__ == "__main__":
         method="console",
         welcome=False,
         keep_asking=True,
-        test_query="play surma surma on gaana",
+        test_query="go to stack overflow",
     )
     pass

@@ -78,21 +78,25 @@ class Analyse:
         query = self.query
 
         # / Open program
-        if Tools.reOperation(query, "open", "at start"):
+        if Tools.reOperation(query, ("open"), "at start"):
             OpenClassify(query.replace("open ", "", 1)).classify()
 
         # / Play content
-        elif Tools.reOperation(query, "play", "at start"):
+        elif Tools.reOperation(query, ("play"), "at start"):
             PlayClassify(query.replace("play ", "")).classify()
 
         # / Search content
-        elif Tools.reOperation(query, "search", "at start"):
+        elif Tools.reOperation(query, ("search"), "at start"):
             Search.classify(query)
 
         # / Open web
-        elif Tools.reOperation(query, "go to", "at start"):
+        elif Tools.reOperation(query, ("go to", "visit"), "at start"):
             query = query.replace("go to", "", 1)
-            # TODO: From here, Scrape google to get website URL
+            client = Web.searchOnPreferedEngine(query, openLink=False)
+            link = client.find_element_by_xpath(
+                '//*[@id="rso"]/div[1]/div/div/div[1]/a'
+            ).get_attribute("href")
+            webbrowser.open_new_tab(link)
 
         # / Game
         elif "game" in query:
