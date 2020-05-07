@@ -30,6 +30,13 @@ class Web:
         except Exception:
             return False
 
+    def getWebsiteLinkByName(self, query):
+        client = self.searchOnPreferedEngine(query, openLink=False)
+        link = client.find_element_by_xpath(
+            '//*[@id="rso"]/div[1]/div/div/div[1]/a'
+        ).get_attribute("href")
+        return link
+
     def searchOnPreferedEngine(self, query, openLink=True) -> (bool, webdriver.Chrome):
         engine = search_engines.find_one({"name": "Google"})
         HOST = engine["host"]

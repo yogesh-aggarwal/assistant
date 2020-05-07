@@ -27,7 +27,6 @@ from tools import synthesis as syn
 from tools.analyse import Analyse
 from tools.behaviour import init, terminate
 
-
 ansi()
 
 
@@ -43,13 +42,16 @@ class Assistant:
         self.start()
 
     def start(self):
-        while self.keep_asking or self.test_query:
-            # / Start tracking session
-            init()
-            # / Analyse query
-            Analyse(self.query).parse()
-            # / Terminate tracking session
-            terminate()
+        self.query = self.takeQuery()
+        startTime = time.time()
+        # init() # TODO: Start tracking session
+        # / Analyse query
+        Analyse(self.query).parse()
+        # terminate() # TODO: Terminate tracking session
+        stopTime = time.time()
+        print(f"[INFO] Elapsed time: {stopTime-startTime}s")
+
+        self.start() if self.keep_asking else False
 
     @staticmethod
     def wish():
@@ -76,9 +78,9 @@ class Assistant:
 
 
 if __name__ == "__main__":
-    startTime = time.time()
     Assistant(
-        method="console", welcome=False, keep_asking=True, test_query="open settings",
+        method="console",
+        welcome=False,
+        keep_asking=False,
+        # test_query="search yogesh-aggarwal github",
     )
-    stopTime = time.time()
-    print(f"[INFO] Elapsed time: {stopTime-startTime}s")

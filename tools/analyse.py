@@ -92,10 +92,7 @@ class Analyse:
         # / Open web
         elif Tools.reOperation(query, ("go to", "visit"), "at start"):
             query = query.replace("go to", "", 1)
-            client = Web.searchOnPreferedEngine(query, openLink=False)
-            link = client.find_element_by_xpath(
-                '//*[@id="rso"]/div[1]/div/div/div[1]/a'
-            ).get_attribute("href")
+            link = Web.getWebsiteLinkByName(query)
             webbrowser.open_new_tab(link)
 
         # / Game
@@ -128,6 +125,7 @@ class OpenClassify:
 
     def __init__(self, query):
         self.query = query.strip().capitalize()
+        self.solved = False
 
     def classify(self):
         if PLATFORM == "windows":
@@ -139,14 +137,15 @@ class OpenClassify:
                 "The operating system is not supported for such type of operations"
             )
             return False
+        if not self.solved:
+            webbrowser.open_new_tab(Web.getWebsiteLinkByName(self.query))
+            self.solved = True
 
     def openWin32Program(self):
         # Getting the program
         properties = win32_install_programs.find_one({"names": self.query})
         if not properties:
-            syn.speak(
-                "Sorry to say your requested program is not found in my experience."
-            )
+            self.solved = False
             return False
 
         OPEN_METHOD = properties["openMethod"]
@@ -169,17 +168,17 @@ class OpenClassify:
         else:
             # Application is executable
             os.system(FILE_NAME)
+        self.solved = True
 
     def openLinuxProgram(self):
         # Getting the program
         properties = linux_install_programs.find_one({"names": self.query})
         if not properties:
-            syn.speak(
-                "Sorry to say your requested program is not found in my experience."
-            )
+            self.solved = False
             return False
         # Launching by command
         os.system(properties["command"])
+        self.solved = True
 
 
 class PlayClassify:
