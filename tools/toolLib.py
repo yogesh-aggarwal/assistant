@@ -9,11 +9,8 @@ An integrative library that contains the tools required to work the assistant.
 import re
 import webbrowser
 
-from sql_tools import sqlite
-from . import synthesis as syn
-
 from . import web as web_tools
-from .constants import dbServices
+from .mongo_client import search_engines
 
 Web = web_tools.Web()
 
@@ -26,104 +23,81 @@ class Search:
     def __init__(self):
         pass
 
-    def classify(self, query=""):
+    def classify(self, query="") -> None:
         """
         Classfies the type of search query provided.
         """
-        engines = (
-            sqlite.execute("SELECT name FROM ENGINES", db=dbServices,).get[0][0].T[0]
+        engines = Dict.getOnlyValuesOfKey_lod(
+            search_engines.find({}), "name", lambda x: x.lower()
         )
-
-        print(engines)
-        # exit()
-
-        isSearchInQuery = True if "search" in query else False
-        wordList = query.lower().replace("search", "", 1).strip().split(" ")
+        wordList = query.replace("search", "", 1).strip().split(" ")
         engine = None
 
-        for i in range(len(wordList)):
-            try:
-                if wordList[0] in ["for", "at", "on"]:
-                    wordList.pop(0)
-            except Exception:
-                pass
-        print(wordList)
+        # / Checking if the searching engine is not at start but at the last.
+        if (
+            (wordList[-1] in engines)
+            and (len(wordList) > 1)
+            and (wordList[-2] in ["on", "at"])
+        ):  # Check if it contains the keywords that signifies that the word is the engine.
+            engine = wordList[-1]
+            wordList.pop(-1)
+            wordList.pop(-1)
 
-        for __engine in engines:
-            if (
-                wordList[0].capitalize() == __engine
-            ):  # Check if the search engine is at the start of the query.
-                queryType = "Search"
-                for __engine in engines:
-                    if (
-                        wordList[-1].capitalize() == __engine
-                    ):  # Checking if there is more than one engines present in the query, at start & at end.
-                        if wordList[-2] in [
-                            "on",
-                            "at",
-                        ]:  # Check if it contains the keywords that signifies that the word is the engine.
-                            engine = wordList[-1].capitalize()
-                            break
-                        else:
-                            engine = wordList[
-                                0
-                            ].capitalize()  # The search engine is at the start
-                            break
-                    else:
-                        engine = wordList[
-                            0
-                        ].capitalize()  # The search engine is at the start
+        # / Check if the search engine is at the start of the query.
+        elif wordList[0] in engines:
+            engine = wordList[0]
 
-            elif (
-                wordList[-1].capitalize() == __engine or isSearchInQuery
-            ):  # Checking if the searching engine is not at start but at the last.
-                for __engine in engines:
-                    if wordList[-2] in [
-                        "on",
-                        "at",
-                    ]:  # Check if it contains the keywords that signifies that the word is the engine.
-                        engine = wordList[-1].capitalize()
-                        break
-                    else:
-                        engine = (
-                            wordList[0].capitalize() if engine in engines else "Google"
-                        )  # The search engine is at the start
-                        if engine in engines:
-                            break
-                queryType = "search"
-                break
+        try:
+            wordList.remove(engine)
+        except:
+            pass
 
-            else:
-                queryType = "not_search"
+        searchQuery = " ".join(wordList)
 
-        if queryType == "search":
-            try:
-                wordList.remove(engine.lower())
-            except Exception:
-                pass
+        if engine == None:
+            engine = "google"
 
-            if wordList[0] in ["for", "at", "on"]:
-                wordList.pop(0)
-            if wordList[-1] in ["for", "at", "on"]:
-                wordList.pop(-1)
+        print(wordList, engine)
+        self.searchEngine(query=searchQuery, engine=engine)
 
-            searchQuery = " ".join(wordList)
-
-            if engine != None:
-                self.searchEngine(query=searchQuery, engine=engine)
-        else:
-            syn.speak("I am unable to understand the query.")
-
-    def searchEngine(self, query="", engine="Google"):
+    def searchEngine(self, query="", engine="google") -> None:
         """
         Opens the webpage by searching the provideed query on the specified search engine.
         If no engine is provided it will search the query on Google.
         """
-        engine = engine.lower()
         query = query.replace(engine, "", 1)
-        method = Tools().getsearchSlug(engine)
-        print(f"https://{engine}.com{method}{query}")
-        webbrowser.open_new_tab(f"https://{engine}.com{method}{query}")
+        engine = search_engines.find_one({"name": engine.capitalize()})
+        if not engine:
+            engine = search_engines.find_one({"name": "Google"})
+        METHOD = engine["querySlug"]
+        HOST = engine["host"]
+        PROTOCOL = "https" if engine["isHttps"] else "http"
+        webbrowser.open_new_tab(f"{PROTOCOL}://{HOST}{METHOD}{query}")
+
+
+class String:
+    @staticmethod
+    def spaceToCamelcase(string) -> str:
+        wordList = "".join([x.title() for x in string.split(" ")])
+        return f"{wordList[0].lower()}{wordList[1:]}"
+
+
+class Dict:
+    @staticmethod
+    def getOnlyValuesOfKey_lod(list, key, _callback) -> list:
+        """
+        Returns the list of values of the specified key from the list of dicts
+        For eg: `[{"name": "foo"}, {"name": "bar", "age": 20}]`
+             -> `["foo", "bar"]`
+        """
+        values = []
+        for x in list:
+            if _callback:
+                x = _callback(x[key])
+                values.append(x)
+            else:
+                values.append(x[key])
+        return values
 
 
 class Tools:
@@ -134,23 +108,7 @@ class Tools:
     def __init__(self):
         pass
 
-    def getsearchSlug(self, engine=""):
-        """
-        Returns the search method of the specified search engine from the database.
-        """
-        # Get methods from sql database and map them to dicts.
-        try:
-            return sqlite.execute(
-                db=dbServices,
-                command=f"SELECT METHOD FROM ENGINES WHERE NAME='{engine.capitalize()}'",
-            ).get[0][0][0][0]
-        except Exception:
-            return sqlite.execute(
-                db=dbServices,
-                command=f"SELECT METHOD FROM ENGINES WHERE NAME='Google'",
-            ).get[0][0][0][0]
-
-    def reOperation(self, query, string, method):
+    def reOperation(self, query, string, method) -> bool:
         """
         Performs some simple regular expressions operations on the specified query.
         """
@@ -181,13 +139,13 @@ class Tools:
         return __temp
 
     @property
-    def getUserPath(self):
+    def getUserPath(self) -> str:
         from pathlib import Path
 
         return str(Path.home())
 
     @staticmethod
-    def strTolst(query):
+    def strTolst(query) -> list:
         intLst = (1, 2, 3, 4, 5, 6, 7, 8, 0)
 
         tempLst = (

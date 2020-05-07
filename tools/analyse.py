@@ -2,17 +2,18 @@ import os
 import random
 import webbrowser
 
-from .mongo_client import win32_install_programs, linux_install_programs
 from api import chatbot, games, search
 from api.play import apiMusic, apiVideo
 
 from exception import QueryError
 from tools.behaviour import terminate
-from sql_tools import sqlite
+
 from . import synthesis as syn
 from . import toolLib as tools_lib
 from . import web as web_tools
 from .constants import dbAttributes, greetKeywords, webDomains
+from .mongo_client import linux_install_programs, win32_install_programs
+from .toolLib import String
 
 Tools = tools_lib.Tools()
 Web = web_tools.Web()
@@ -85,8 +86,7 @@ class Analyse:
 
         # Search content
         elif Tools.reOperation(query, "search", "at start"):
-            var = Search()
-            var.classify(query)
+            Search.classify(query)
 
         # Open web
         elif Tools.reOperation(query, "go to", "at start"):
@@ -137,6 +137,8 @@ class Analyse:
         Classifies the query containing "open" keyword.
         """
         query = query.strip().capitalize()
+
+        # // Windows
         if self.platform == "windows":
             # Getting the program
             properties = win32_install_programs.find_one({"names": query})
@@ -167,6 +169,7 @@ class Analyse:
                 # Application is executable
                 os.system(FILE_NAME)
 
+        # // Linux
         elif self.platform == "linux":
             # Getting the program
             properties = linux_install_programs.find_one({"names": query})
@@ -178,6 +181,7 @@ class Analyse:
             # Launching by command
             os.system(properties["command"])
 
+        # // Platform Not Supported
         else:
             syn.speak(
                 "The operating system is not supported for such type of operations"
@@ -193,13 +197,7 @@ class Analyse:
         """
         wordList = query.split(" ")
         service = None
-
-        query = " ".join(wordList)
-
-        try:
-            query = query.replace("youtube music", "youtubeMusic")
-        except Exception:
-            pass
+        query = String.spaceToCamelcase(query)
 
         wordList = query.split(" ")
 
@@ -219,6 +217,7 @@ class Analyse:
         }
 
         # Redirecting to service
+        # // Online Service
         if Web.checkConnection():
             try:
                 services[service](query)
@@ -237,13 +236,11 @@ class Analyse:
                 services["youtube"](query, openLink=True)
                 syn.speak(random.choice(greetKeywords))
 
+        # // Offline Service
         else:
-            videoDir, musicDir = sqlite.execute(
-                "SELECT value FROM USER_ATTRIBUTES WHERE name IN ('musicDirectory', 'videoDirectory')",
-                db=dbAttributes,
-            ).get.T[0][0]
+            videoDir, musicDir = ["", ""]
             videoFiles = os.listdir(videoDir)
             musicFiles = os.listdir(musicDir)
 
-            # TODO SEARCH HERE FOR MORE RELEVANT RESULTS
+            # TODO: SEARCH HERE FOR MORE RELEVANT RESULTS
             os.startfile(os.path.join(videoDir, random.choice(videoFiles)))

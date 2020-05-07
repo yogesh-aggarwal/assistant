@@ -3,54 +3,54 @@
         "name": "Google",
         "host": "google.com",
         "isHttps": true,
-        "queryMethod": "/search?q="
+        "querySlug": "/search?q="
     },
     {
         "name": "Bing",
         "host": "bing.com",
         "isHttps": true,
-        "queryMethod": "/search?q="
+        "querySlug": "/search?q="
     },
     {
         "name": "Ask",
         "host": "ask.com",
         "isHttps": true,
-        "queryMethod": "/web?q="
+        "querySlug": "/web?q="
     },
     {
         "name": "Yahoo",
         "host": "yahoo.com",
         "isHttps": true,
-        "queryMethod": "/search?p="
+        "querySlug": "/search?p="
     },
     {
         "name": "Baidu",
         "host": "baidu.com",
         "isHttps": true,
-        "queryMethod": "/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd="
+        "querySlug": "/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd="
     },
     {
         "name": "Yendex",
         "host": "yendex.com",
         "isHttps": true,
-        "queryMethod": "/search/?lr=108944&text="
+        "querySlug": "/search/?lr=108944&text="
     },
     {
         "name": "Duckduckgo",
         "host": "duckduckgo.com",
         "isHttps": true,
-        "queryMethod": "/?q="
+        "querySlug": "/?q="
     },
     {
         "name": "Swisscows",
         "host": "swisscows.com",
         "isHttps": true,
-        "queryMethod": "/web?query="
+        "querySlug": "/web?query="
     },
     {
         "name": "Creative common",
         "host": "ccsearch.creativecommons.org",
         "isHttps": true,
-        "queryMethod": "/search?q="
+        "querySlug": "/search?q="
     }
 ]

@@ -2,8 +2,6 @@
 Extention for chatbot for Jycore AI Project
 """
 from tools.toolLib import Tools
-from sql_tools import sqlite
-from tools.constants import dbAttributes
 
 
 class AnalyseQuestion:
@@ -24,13 +22,8 @@ class Question:
         Checks whether the provided query is a question or not.
         """
         __temp = False
-        qWords = (
-            sqlite.execute(db=dbAttributes, command="SELECT * FROM KEYWORDS;")
-            .get[0][0][1]
-            .replace("(", "", 1)
-            .replace(")", "", 1)
-            .split(", ")
-        )
+        # FIXME: Get question words from DB
+        qWords = []
 
         for word in qWords:
             if Tools().reOperation(query.upper(), word, "at start"):
