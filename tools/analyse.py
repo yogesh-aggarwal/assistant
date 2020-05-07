@@ -1,4 +1,5 @@
 import os
+import platform
 import random
 import webbrowser
 
@@ -11,13 +12,14 @@ from tools.behaviour import terminate
 from . import synthesis as syn
 from . import toolLib as tools_lib
 from . import web as web_tools
-from .constants import dbAttributes, greetKeywords, webDomains
+from .constants import greetKeywords, webDomains
 from .mongo_client import linux_install_programs, win32_install_programs
-from .toolLib import String
 
 Tools = tools_lib.Tools()
 Web = web_tools.Web()
 Search = tools_lib.Search()
+
+PLATFORM = platform.system().lower()
 
 
 class Analyse:
@@ -25,9 +27,8 @@ class Analyse:
     Class that contains analysis tools for the query provided.
     """
 
-    def __init__(self, query, platform):
+    def __init__(self, query):
         self.query = query
-        self.platform = platform.lower()
 
     def parse(self):
         query = self.query
@@ -76,45 +77,28 @@ class Analyse:
         """
         query = self.query
 
-        # Open program
+        # / Open program
         if Tools.reOperation(query, "open", "at start"):
-            self.openClassify(query.replace("open ", "", 1))
+            OpenClassify(query.replace("open ", "", 1)).classify()
 
-        # Play content
+        # / Play content
         elif Tools.reOperation(query, "play", "at start"):
-            self.playClassify(query.replace("play ", ""))
+            PlayClassify(query.replace("play ", "")).classify()
 
-        # Search content
+        # / Search content
         elif Tools.reOperation(query, "search", "at start"):
             Search.classify(query)
 
-        # Open web
+        # / Open web
         elif Tools.reOperation(query, "go to", "at start"):
-            query = (
-                query.replace("go to", "", 1)
-                .replace("https://", "", 1)
-                .replace("http://", "", 1)
-                .replace(" ", "")
-            )
-            domain = Web.findDomain(query)
-            if domain != "err_no_connection":
-                if domain != "Webpage does not exists":
-                    webbrowser.open_new_tab("https://" + query + domain)
+            query = query.replace("go to", "", 1)
+            # TODO: From here, Scrape google to get website URL
 
-            else:
-                syn.speak("You don't have internet connection")
-
-        # Other search for questions on Google
-        # FIXME: Temporary, get the question keywords from database
-        elif query.split(" ")[0].upper() in ["What"]:
-            # SCRAP GOOGLE TO GET RESULTS
-            result = chatbot.Question().checkQuestion(query)
-            syn.speak(result) if result else syn.speak(search.Web().google(query))
-
-        # Game
+        # / Game
         elif "game" in query:
             games.init()
 
+        # / EXTRA COMMANDS
         # Exiting
         elif query == "exit":
             terminate()  # Terminating tracking session
@@ -126,88 +110,83 @@ class Analyse:
             query = query.replace("test", "", 1).lower().strip()
             self.playClassify(query.replace("open", "", 1))
 
+        # Other search for questions on Google
         else:
-            # Not understood
-            syn.speak(
-                "I am not able to understand your query at the moment. Please try after future updates."
-            )
+            # SCRAP GOOGLE TO GET RESULTS
+            result = chatbot.Question().checkQuestion(query)
+            syn.speak(result) if result else syn.speak(search.Web().google(query))
 
-    def openClassify(self, query):
-        """
-        Classifies the query containing "open" keyword.
-        """
-        query = query.strip().capitalize()
 
-        # // Windows
-        if self.platform == "windows":
-            # Getting the program
-            properties = win32_install_programs.find_one({"names": query})
-            if not properties:
-                syn.speak(
-                    "Sorry to say your requested program is not found in my experience."
-                )
-                return False
+class OpenClassify:
+    """
+    Classifies the query containing "open" keyword.
+    """
 
-            OPEN_METHOD = properties["openMethod"]
-            FILE_NAME = properties["fileName"]
-            LOCATION_METHOD = properties["locationMethod"]
+    def __init__(self, query):
+        self.query = query.strip().capitalize()
 
-            if OPEN_METHOD == "exe":
-                # Extracting only if the program is opened by exe not command
-                LOCATION = properties["defaultInstallLocation"]
-                # Application is dependent of user home path
-                if LOCATION_METHOD == "user":
-                    # Application is executable
-                    os.startfile(f"{Tools.getUserPath}\\{LOCATION}\\{FILE_NAME}")
-                    syn.speak(random.choice(greetKeywords))
-                else:
-                    # Application is independent of user home path
-                    os.startfile(f"{LOCATION}\\{FILE_NAME}")
-                    syn.speak(random.choice(greetKeywords))
-
-            else:
-                # Application is executable
-                os.system(FILE_NAME)
-
-        # // Linux
-        elif self.platform == "linux":
-            # Getting the program
-            properties = linux_install_programs.find_one({"names": query})
-            if not properties:
-                syn.speak(
-                    "Sorry to say your requested program is not found in my experience."
-                )
-                return False
-            # Launching by command
-            os.system(properties["command"])
-
-        # // Platform Not Supported
+    def classify(self):
+        if PLATFORM == "windows":
+            self.openWin32Program()
+        elif PLATFORM == "linux":
+            self.openLinuxProgram()
         else:
             syn.speak(
                 "The operating system is not supported for such type of operations"
             )
             return False
 
-        return True
+    def openWin32Program(self):
+        # Getting the program
+        properties = win32_install_programs.find_one({"names": self.query})
+        if not properties:
+            syn.speak(
+                "Sorry to say your requested program is not found in my experience."
+            )
+            return False
 
-    @staticmethod
-    def playClassify(query):
-        """
-        Classifies the query containing "play" keyword.
-        """
-        wordList = query.split(" ")
-        service = None
-        query = String.spaceToCamelcase(query)
+        OPEN_METHOD = properties["openMethod"]
+        FILE_NAME = properties["fileName"]
+        LOCATION_METHOD = properties["locationMethod"]
 
-        wordList = query.split(" ")
+        if OPEN_METHOD == "exe":
+            # Extracting only if the program is opened by exe not command
+            LOCATION = properties["defaultInstallLocation"]
+            # Application is dependent of user home path
+            if LOCATION_METHOD == "user":
+                # Application is executable
+                os.startfile(f"{Tools.getUserPath}\\{LOCATION}\\{FILE_NAME}")
+                syn.speak(random.choice(greetKeywords))
+            else:
+                # Application is independent of user home path
+                os.startfile(f"{LOCATION}\\{FILE_NAME}")
+                syn.speak(random.choice(greetKeywords))
 
-        for i in [" on", " in", " at", " with"]:
-            if Tools.reOperation(" ".join(wordList[: len(wordList) - 1]), i, "at end"):
-                service = wordList[-1]
-                query = query.replace(i, "", -1).replace(service, "", -1)
-                break
+        else:
+            # Application is executable
+            os.system(FILE_NAME)
 
-        services = {
+    def openLinuxProgram(self):
+        # Getting the program
+        properties = linux_install_programs.find_one({"names": self.query})
+        if not properties:
+            syn.speak(
+                "Sorry to say your requested program is not found in my experience."
+            )
+            return False
+        # Launching by command
+        os.system(properties["command"])
+
+
+class PlayClassify:
+    """
+    Classifies the query containing "play" keyword.
+    """
+
+    def __init__(self, query):
+        self.query = query
+        self.service = None
+        self.services = {
             # Video services
             "youtube": apiVideo().youtube,
             # Music services
@@ -216,31 +195,48 @@ class Analyse:
             "youtubeMusic": apiMusic().youtubeMusic,
         }
 
-        # Redirecting to service
-        # // Online Service
+    def classify(self):
+        # Handling queries with service name having spaces
+        self.normalizeQueryForServices()
+        wordList = self.query.split(" ")
+
+        for i in [" on", " in", " at", " with"]:
+            if Tools.reOperation(" ".join(wordList[: len(wordList) - 1]), i, "at end"):
+                self.service = wordList[-1]
+                self.query = self.query.replace(i, "", -1).replace(self.service, "", -1)
+                break
+
         if Web.checkConnection():
-            try:
-                services[service](query)
-            except QueryError:
-                if service is not None:
-                    syn.speak(
-                        f"No result found for your query so I am opening it on YouTube"
-                    )
-                services["youtube"](query, openLink=True)
-                syn.speak(random.choice(greetKeywords))
-            except Exception:
-                if service is not None:
-                    syn.speak(
-                        f"{service} is not supported yet so I am opening it on YouTube"
-                    )
-                services["youtube"](query, openLink=True)
-                syn.speak(random.choice(greetKeywords))
-
-        # // Offline Service
+            self.playOnlineServices()
         else:
-            videoDir, musicDir = ["", ""]
-            videoFiles = os.listdir(videoDir)
-            musicFiles = os.listdir(musicDir)
+            self.playOfflineServices()
 
-            # TODO: SEARCH HERE FOR MORE RELEVANT RESULTS
-            os.startfile(os.path.join(videoDir, random.choice(videoFiles)))
+    def normalizeQueryForServices(self) -> None:
+        services = {"youtube music": "youtubeMusic"}
+        for service in services:
+            self.query.replace(service, services[service])
+
+    def playOnlineServices(self) -> bool:
+        try:
+            self.services[self.service](self.query)
+        except QueryError:
+            if self.service is not None:
+                syn.speak(f"No result found for your so I am opening it on YouTube")
+            self.services["youtube"](self.query, openLink=True)
+            syn.speak(random.choice(greetKeywords))
+        except Exception:
+            if self.service is not None:
+                syn.speak(
+                    f"{self.service} is not supported yet so I am opening it on YouTube"
+                )
+            self.services["youtube"](self.query, openLink=True)
+            syn.speak(random.choice(greetKeywords))
+
+    def playOfflineServices(self) -> bool:
+        videoDir, musicDir = ["", ""]
+        videoFiles = os.listdir(videoDir)
+        musicFiles = os.listdir(musicDir)
+
+        # TODO: SEARCH HERE FOR MORE RELEVANT RESULTS
+        os.startfile(os.path.join(videoDir, random.choice(videoFiles)))
+        os.startfile(os.path.join(musicDir, random.choice(musicFiles)))
