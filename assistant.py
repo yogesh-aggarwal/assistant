@@ -22,7 +22,6 @@ import time
 
 from colorama import init as ansi
 
-from sql_tools import sqlite
 from tools import synthesis as syn
 from tools.analyse import Analyse
 from tools.behaviour import init, terminate

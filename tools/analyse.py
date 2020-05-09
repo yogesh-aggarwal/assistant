@@ -3,7 +3,7 @@ import platform
 import random
 import webbrowser
 
-from api import chatbot, games, search
+from api import chatbot, games
 from api.play import apiMusic, apiVideo
 
 from exception import QueryError
@@ -114,8 +114,7 @@ class Analyse:
         # Other search for questions on Google
         else:
             # SCRAP GOOGLE TO GET RESULTS
-            result = chatbot.Question().checkQuestion(query)
-            syn.speak(result) if result else syn.speak(search.Web().google(query))
+            chatbot.Question(query)
 
 
 class OpenClassify:

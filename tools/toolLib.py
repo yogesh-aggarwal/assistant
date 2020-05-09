@@ -54,7 +54,7 @@ class Search:
 
         searchQuery = " ".join(wordList)
 
-        if engine == None:
+        if engine is None:
             engine = "google"
 
         print(wordList, engine)
