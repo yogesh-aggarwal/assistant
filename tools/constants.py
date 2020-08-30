@@ -14,3 +14,4 @@ webDomains = [".com", ".org", ".in", ".edu", ".net", ".arpa"]
 
 MongoURI = "mongodb://localhost:27017"
 dbName = "jycore"
+language="en"

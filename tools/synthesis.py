@@ -3,14 +3,9 @@ Synthesis extention for Jycore AI project.
 """
 
 # import os
-import pyttsx3
 import speech_recognition as sr
-import platform
-
-
-engine = pyttsx3.init("sapi5")
-voices = engine.getProperty("voices")
-engine.setProperty("voice", voices[1].id)
+from google_speech import Speech
+from .constants import language
 
 
 def listen():
@@ -37,16 +32,13 @@ def listen():
     return query
 
 
-def speak(s):
+def speak(line):
     """
     Speaks the string provided.
     """
-    if platform.system() == "Windows":
-        engine.say(s)
-        engine.runAndWait()
-        # print(s)
-    elif platform.system() == "Linux":
-        print(s)
-        # os.system(f"espeak '{s}'")
-    else:
-        print("Platform not supported")
+    try:
+        speech = Speech(line, language)
+        soxEffects = ("speed", "1.1")
+        speech.play(soxEffects)
+    except Exception:
+        print("Error while speaking!")
