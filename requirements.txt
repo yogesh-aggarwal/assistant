@@ -16,4 +16,6 @@ tools-lib==0.0.3
 playsound==1.2.2
 newsapi-python==0.2.6
 opencv-python==4.1.2.30
+selenium==3.141.0
+pymongo==3.11.0
 pylama

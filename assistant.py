@@ -78,7 +78,7 @@ class Assistant:
 
 if __name__ == "__main__":
     Assistant(
-        method="console",
+        method="voice",
         welcome=False,
         keep_asking=False,
         # test_query="search yogesh-aggarwal github",
